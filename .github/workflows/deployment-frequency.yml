@@ -40,3 +40,13 @@ jobs:
             if (numberOfDays < 30) {
               numberOfDays = 30
             }
+
+            let earliestDate = new Date() - numberOfDays * 24 * 60 * 60 * 1000
+            console.log('Earliest date: ' + earliestDate)
+
+            const workflowRuns = await github.rest.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: inputs.repo,
+                workflow_id: inputs.workflowName,
+              });
+            console.log('Total workflow runs: ' + workflowRuns.data.total_count)
