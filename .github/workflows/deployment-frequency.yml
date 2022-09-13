@@ -39,6 +39,7 @@ jobs:
             let color = 'red'
             let numberOfDays =  ${{ inputs.numberOfDays }}
             let workflowId = "${{ inputs.workflowName }}"
+            let jobName = "${{ inputs.jobname }}"
 
             if (numberOfDays < 30) {
               numberOfDays = 30
@@ -65,10 +66,11 @@ jobs:
             console.log('Eligible workflows')
             console.log(eligibleWorkflowsRuns)
 
-            if(!${{ inputs.jobName }}){
+            if(!jobName) {
               productWorkflowRuns.push(eligibleWorkflowsRuns)
             }else{
               completionDates = []
+              console.log("No job name provided")
             }
 
             console.log(productWorkflowRuns)
