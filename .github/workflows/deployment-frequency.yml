@@ -38,11 +38,12 @@ jobs:
             let uniqueDates = []
             let color = 'red'
             let numberOfDays =  ${{ inputs.numberOfDays }}
-            let workflowId = ${{ inputs.workflowName }}
+            let workflowId = "${{ inputs.workflowName }}"
 
             if (numberOfDays < 30) {
               numberOfDays = 30
             }
+            console.log('Workflow ID: ' + workflowId)
 
             let earliestDate = new Date() - numberOfDays * 24 * 60 * 60 * 1000
             console.log('Earliest date: ' + earliestDate)
@@ -52,6 +53,8 @@ jobs:
                 repo: context.repo.repo,
                 workflow_id: workflowId,
               });
+
+            console.log('First workflow run: ' + workflowRuns.data.workflow_runs[0])
 
             workflowRuns.data.workflow_runs.forEach((workflowRun) => {
               if (workflowRun.created_at > earliestDate) {
