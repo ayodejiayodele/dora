@@ -21,36 +21,30 @@ jobs:
         with:
           script: |
 
-            const getWorkflowRuns = await github.rest.actions.listWorkflowRuns({
+            let productWorkflows = []
+
+            const workflowRuns = await github.rest.actions.listWorkflowRuns({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 workflow_id: ${{ inputs.workflowName }},
               });
 
-            const allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
-               owner: context.repo.owner,
-               repo: context.repo.repo,
-               run_id: getWorkflowRuns.data.workflow_runs[0].id,
-            });
+            for (const workflowRun of workflowRuns.data.workflow_runs) {
+              const jobs = await github.rest.actions.listJobsForWorkflowRun({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: workflowRun.id,
+              });
 
-            const matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
-              return artifact.name == "theShoeShop"
-            })[0];
+              if(!${{ inputs.jobName }}){
+                productWorkflows.push(jobs.data.jobs)
+              }else{
+                const filteredProductionJob = jobs.data.jobs.filter(job => job.name === ${{ inputs.jobname }})
 
-            const download = await github.rest.actions.downloadArtifact({
-               owner: context.repo.owner,
-               repo: context.repo.repo,
-               artifact_id: matchArtifact.id,
-               archive_format: 'zip',
-            });
+                if (filteredProductionJob.length > 0 && filteredProductionJob[0].conclusion === 'success') {
+                  productWorkflows.push(workflowRun)
+                }
+              }
+            }
 
-            let fs = require('fs');
-            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/theShoeShop.zip`, Buffer.from(download.data));
 
-      - name: Deploy to Azure Web App
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_QA }}
-          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
