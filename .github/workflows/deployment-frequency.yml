@@ -3,6 +3,10 @@ name: Deployment Frequuency
 on:
   workflow_dispatch:
     inputs: 
+      repo:
+        description: 'Repository name'
+        required: true
+        default: 'dora'
       workflowname:
         description: 'Workflow name of yaml filename'
         required: true 
@@ -42,7 +46,7 @@ jobs:
 
             const workflowRuns = await github.rest.actions.listWorkflowRuns({
                 owner: context.repo.owner,
-                repo: context.repo.repo,
+                repo: inputs.repo,
                 workflow_id: ${{ inputs.workflowName }},
               });
 
