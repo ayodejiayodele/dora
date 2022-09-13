@@ -49,10 +49,5 @@ jobs:
                 repo: context.repo.repo,
                 workflow_id: ${{ inputs.workflowName }},
               });
+            console.log(workflowRuns.length)
 
-            workflowRuns.data.workflow_runs.forEach((workflowRun) => {
-              if (workflowRun.created_at > earliestDate) {
-                eligibleWorkflowsRuns.push(workflowRun)
-                completionDates.push(new Date(workflowRun.completed_at).toISOString().split('T')[0])
-              }
-            })
