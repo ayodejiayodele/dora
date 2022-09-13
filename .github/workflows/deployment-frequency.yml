@@ -46,7 +46,7 @@ jobs:
             }
             console.log('Workflow ID: ' + workflowId)
 
-            let earliestDate = new Date() - numberOfDays * 24 * 60 * 60 * 1000
+            let earliestDate = $(date -d "-${numberOfDays} days")
             console.log('Earliest date: ' + earliestDate)
 
             const workflowRuns = await github.rest.actions.listWorkflowRuns({
