@@ -48,29 +48,3 @@ jobs:
 
             let earliestDate = $(date -d "-${numberOfDays} days")
             console.log('Earliest date: ' + earliestDate)
-
-            const workflowRuns = await github.rest.actions.listWorkflowRuns({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                workflow_id: workflowId,
-              });
-
-            console.log(workflowRuns.data.workflow_runs[0])
-
-            workflowRuns.data.workflow_runs.forEach((workflowRun) => {
-              if (workflowRun.created_at > earliestDate) {
-                eligibleWorkflowsRuns.push(workflowRun);
-                completionDates.push(new Date(workflowRun.completed_at).toISOString().split('T')[0]);
-              }
-            });
-            console.log('Eligible workflows')
-            console.log(eligibleWorkflowsRuns)
-
-            if(!jobName) {
-              productWorkflowRuns.push(eligibleWorkflowsRuns)
-            }else{
-              completionDates = []
-              console.log("No job name provided")
-            }
-
-            console.log(productWorkflowRuns)
