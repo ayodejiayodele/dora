@@ -49,5 +49,6 @@ jobs:
             const workflowRuns = await github.rest.actions.listWorkflowRuns({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                workflow_id: inputs.workflowName,
+                workflow_id: ${{ inputs.workflowName }},
               });
+            console.log(workflowRuns.length)
