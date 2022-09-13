@@ -46,6 +46,13 @@ jobs:
 
             const workflowRuns = await github.rest.actions.listWorkflowRuns({
                 owner: context.repo.owner,
-                repo: ${{ inputs.repo }},
+                repo: context.repo.repo,
                 workflow_id: ${{ inputs.workflowName }},
               });
+
+            workflowRuns.data.workflow_runs.forEach((workflowRun) => {
+              if (workflowRun.created_at > earliestDate) {
+                eligibleWorkflowsRuns.push(workflowRun)
+                completionDates.push(new Date(workflowRun.completed_at).toISOString().split('T')[0])
+              }
+            })
