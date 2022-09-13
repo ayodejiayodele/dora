@@ -22,10 +22,10 @@ on:
 
 
 jobs:
-  download:
+  calculate-frequency:
     runs-on: ubuntu-latest
     steps:
-      - name: 'Download artifact'
+      - name: 'Get Workflows and Jobs'
         uses: actions/github-script@v6
         with:
           script: |
@@ -47,7 +47,7 @@ jobs:
             const workflowRuns = await github.rest.actions.listWorkflowRuns({
                 owner: context.repo.owner,
                 repo: inputs.repo,
-                workflow_id: ${{ inputs.workflowName }},
+                workflow_id: inputs.workflowName,
               });
 
             workflowRuns.data.workflow_runs.forEach((workflowRun) => {
@@ -67,6 +67,7 @@ jobs:
                   repo: context.repo.repo,
                   run_id: workflowRun.id,
                 });
+                
                 const filteredProductionJob = jobs.data.jobs.filter(job => job.name === ${{ inputs.jobname }})
 
                 if (filteredProductionJob.length > 0 && filteredProductionJob[0].conclusion === 'success') {
