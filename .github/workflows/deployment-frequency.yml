@@ -36,3 +36,7 @@ jobs:
             let uniqueDates = []
             let color = 'red'
             let numberOfDays =  ${{ inputs.numberOfDays }}
+
+            if (numberOfDays < 30) {
+              numberOfDays = 30
+            }
