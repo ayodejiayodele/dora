@@ -56,4 +56,3 @@ jobs:
                 completionDates.push(new Date(workflowRun.completed_at).toISOString().split('T')[0])
               }
             })
-
