@@ -54,4 +54,35 @@ jobs:
                 workflow_id: workflowId,
               });
 
-            console.log('First workflow run: ' + workflowRuns.data.workflow_runs[0])
+            console.log(workflowRuns.data.workflow_runs[0])
+
+            workflowRuns.data.workflow_runs.forEach((workflowRun) => {
+              if (workflowRun.created_at > earliestDate) {
+                eligibleWorkflowsRuns.push(workflowRun);
+                completionDates.push(new Date(workflowRun.completed_at).toISOString().split('T')[0]);
+              }
+            });
+            console.log('Eligible workflows')
+            console.log(eligibleWorkflowsRuns)
+
+            if(!${{ inputs.jobName }}){
+              productWorkflowRuns.push(eligibleWorkflowsRuns)
+            }else{
+              completionDates = []
+              for (const workflowRun of eligibleWorkflowsRuns.data.workflow_runs) {
+                const jobs = await github.rest.actions.listJobsForWorkflowRun({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  run_id: workflowRun.id,
+                });
+
+                const filteredProductionJob = jobs.data.jobs.filter(job => job.name === "${{ inputs.jobname }}")
+
+                if (filteredProductionJob.length > 0 && filteredProductionJob[0].conclusion === 'success') {
+                  productWorkflows.push(workflowRun)
+                  completionDates.push(new Date(workflowRun.completed_at).toISOString().split('T')[0])
+                }
+              }
+            }
+
+            console.log(productWorkflowRuns)
