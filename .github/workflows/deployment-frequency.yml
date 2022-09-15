@@ -70,19 +70,37 @@ jobs:
 
             //Get all workflow runs that were completed after the earliest date
             for (const workflowRun of workflowRuns.data.workflow_runs) {
-              console.log('Workflow run ID')
-              console.log(workflowRun.id)
-              console.log('Workflow created at')
-              console.log(workflowRun.created_at)
               if (workflowRun.status === 'completed' && workflowRun.updated_at > dateToCompare) {
-                console.log('Workflow run is eligible')
                 eligibleWorkflowsRuns.push(workflowRun)
                 completionDates.push(workflowRun.updated_at)
               }
             }
 
-            console.log('Eligible workflow runs')
-            console.log(eligibleWorkflowsRuns)
-            console.log('Completion dates')
-            console.log(completionDates)
+            console.log('Eligible workflow runs count')
+            console.log(eligibleWorkflowsRuns.length)
+            console.log('Completion dates count')
+            console.log(completionDates.length)
+
+            //if no jobName is provided, add all eligibleWorkflowsRuns to productWorkflowRuns
+            if (jobName === '') {
+              productWorkflowRuns = eligibleWorkflowsRuns
+            } else {
+              //Get all workflow runs that have the jobName
+              for (const workflowRun of eligibleWorkflowsRuns) {
+                const jobs = await github.rest.actions.listJobsForWorkflowRun({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  run_id: workflowRun.id,
+                });
+
+                for (const job of jobs.data.jobs) {
+                  if (job.name === jobName) {
+                    productWorkflowRuns.push(workflowRun)
+                  }
+                }
+              }
+            }
+            
+            console.log('Product workflow runs count')
+            console.log(productWorkflowRuns.length)
 
