@@ -44,9 +44,13 @@ jobs:
             if (numberOfDays < 30) {
               numberOfDays = 30
             }
-            console.log('Workflow ID: ' + workflowId)
+            console.log('Number of days')
+            console.log(numberOfDays)
+            console.log('Workflow ID')
+            console.log(workflowId)
 
             let earliestDate = new Date()
             earliestDate.setDate(earliestDate.getDate() - numberOfDays)
 
-            console.log('Earliest date: ' + earliestDate.getDate())
+            console.log('Earliest date'
+            console.log(earliestDate.getDate())
