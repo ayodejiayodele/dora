@@ -50,7 +50,7 @@ jobs:
             console.log(workflowId)
 
             let earliestDate = new Date()
-            earliestDate.setDate(earliestDate.getDate() - numberOfDays)
+            earliestDate.setDate(earliestDate.getDate() - numberOfDays))
 
             console.log('Earliest date'
             console.log(earliestDate.getDate())
