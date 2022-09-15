@@ -72,7 +72,8 @@ jobs:
               console.log(workflowRun.id)
               console.log('Workflow created at')
               console.log(workflowRun.created_at)
-              if (workflowRun.created_at > earliestDate) {
+              let workflowRunDate = new Date(workflowRun.created_at)
+              if (workflowRunDate > earliestDate) {
                 console.log('Workflow run is eligible')
                 eligibleWorkflowsRuns.push(workflowRun)
                 completionDates.push(new Date(workflowRun.completed_at).toISOString().split('T')[0])
