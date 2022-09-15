@@ -49,8 +49,12 @@ jobs:
             console.log('Workflow ID')
             console.log(workflowId)
 
+            //Remove numberOfDays from the current date
             let earliestDate = new Date()
-            earliestDate.setDate(earliestDate.getDate() - numberOfDays)
+            earliestDate.setDate(date.getDate() - numberOfDays)
+            let dateToCompare = earliestDate.toISOString()
+
 
             console.log('Earliest date')
             console.log(earliestDate.getDate())
+            console.log(earliestDate.toISOString())
