@@ -54,7 +54,28 @@ jobs:
             earliestDate.setDate(earliestDate.getDate() - numberOfDays)
             let dateToCompare = earliestDate.toISOString()
 
-
             console.log('Earliest date')
             console.log(earliestDate.getDate())
             console.log(earliestDate.toISOString())
+
+            const workflowRuns = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: workflowId,
+            });
+
+            console.log('Workflow runs')
+            console.log(workflowRuns.data)
+
+            workflowRuns.data.workflow_runs.forEach((workflowRun) => {
+              if (workflowRun.created_at > earliestDate) {
+                eligibleWorkflowsRuns.push(workflowRun)
+                completionDates.push(new Date(workflowRun.completed_at).toISOString().split('T')[0])
+              }
+            })
+
+            console.log('Eligible workflow runs')
+            console.log(eligibleWorkflowsRuns)
+            console.log('Completion dates')
+            console.log(completionDates)
+
