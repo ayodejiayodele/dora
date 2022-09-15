@@ -51,7 +51,7 @@ jobs:
 
             //Remove numberOfDays from the current date
             let earliestDate = new Date()
-            earliestDate.setDate(date.getDate() - numberOfDays)
+            earliestDate.setDate(earliestDate.getDate() - numberOfDays)
             let dateToCompare = earliestDate.toISOString()
 
 
