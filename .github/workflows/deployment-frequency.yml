@@ -72,7 +72,7 @@ jobs:
             for (const workflowRun of workflowRuns.data.workflow_runs) {
               if (workflowRun.status === 'completed' && workflowRun.updated_at > dateToCompare) {
                 eligibleWorkflowsRuns.push(workflowRun)
-                completionDates.push(workflowRun.updated_at)
+                completionDates.push(workflowRun.updated_at.split('T')[0])
               }
             }
 
@@ -101,6 +101,14 @@ jobs:
               }
             }
             
-            console.log('Product workflow runs count')
+            console.log('Production workflow runs count')
             console.log(productWorkflowRuns.length)
+
+            //uniqueDates = get unique dates from completionDates
+            uniqueDates = completionDates.filter((date, index) => {
+              return completionDates.indexOf(date) === index
+            })
+
+            console.log('Unique dates count')
+            console.log(uniqueDates.length)
 
