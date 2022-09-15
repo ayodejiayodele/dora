@@ -112,3 +112,29 @@ jobs:
             console.log('Unique dates count')
             console.log(uniqueDates.length)
 
+            let deploymentFrequency = uniqueDates.length / numberOfDays
+
+            console.log('Deployment frequency')
+            console.log(deploymentFrequency)
+
+            let deploymentFrequencyPercentage = deploymentFrequency * 100
+            let deploymentFrequencyString = ''
+            console.log('Deployment frequency percentage')
+            console.log(deploymentFrequencyPercentage + '%')
+
+            if (deploymentFrequency > 1) {
+              deploymentFrequencyString = 'Multiple deployments per day'
+              color = 'green'
+            } else if (deploymentFrequency = 1) {
+              deploymentFrequencyString = 'Daily'
+              color = 'green'
+            } else {
+              deploymentFrequency = 1 / deploymentFrequency
+              deploymentFrequency = Math.round(deploymentFrequency * 100)
+              deploymentFrequencyString = 'Every' + deploymentFrequency + 'days'
+              if (deploymentFrequency < 4) {
+                color = 'yellow'
+              } else {
+                color = 'red'
+              }
+            }
