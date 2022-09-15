@@ -121,7 +121,7 @@ jobs:
             let deploymentFrequencyString = ''
             console.log('Deployment frequency percentage')
             console.log(deploymentFrequencyPercentage + '%')
-
+            
             if (deploymentFrequency > 1) {
               deploymentFrequencyString = 'Multiple deployments per day'
               color = 'green'
@@ -138,3 +138,25 @@ jobs:
                 color = 'red'
               }
             }
+
+            let markdown = `## Workflow Name: ${{ inputs.workflowName }}\n` +
+              `## Job Name: ${{ inputs.jobName }}\n` +
+              `## Deployment Frequency: ${deploymentFrequencyString}\n` +
+              `## Deployment Frequency Percentage: ${deploymentFrequencyPercentage}%\n` +
+              `## Number of days: ${numberOfDays}\n` +
+              `## Color: ${color}\n` +
+              `![Deployment Frequency](https://badgen.net/badge/frequency/${encodeURIComponent(deploymentFrequencyString)}/${color}?icon=github&label=Deployment%20frequency)`
+
+              echo "::set-output name=markdown::${markdown}"
+              echo "${markdown}" >> $GITHUB_STEP_SUMMARY
+
+            const artifact = {
+              name: 'deployment-frequency',
+              path: 'deployment-frequency.txt',
+              contents: uniqueDates.join('\n')
+            }
+      - name: 'Upload artifact'
+        uses: actions/upload-artifact@v2
+        with:
+          name: deployment-frequency
+          path: deployment-frequency.txt
