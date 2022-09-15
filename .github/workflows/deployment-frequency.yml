@@ -139,7 +139,7 @@ jobs:
               }
             }
 
-            let markdown = '## Workflow Name: ${{ inputs.workflowName }}\n' +
+            let markdown = '## Workflow Name: ' + workflowId + '\n' +
               '## Job Name: ${{ inputs.jobName }}\n' +
               '## Deployment Frequency: ${deploymentFrequencyString}\n' +
               '## Deployment Frequency Percentage: ${deploymentFrequencyPercentage}%\n' +
@@ -147,8 +147,10 @@ jobs:
               '## Color: ${color}\n' +
               '![Deployment Frequency](https://badgen.net/badge/frequency/${encodeURIComponent(deploymentFrequencyString)}/${color}?icon=github&label=Deployment%20frequency)'
 
-              echo "::set-output name=markdown::${markdown}"
-              echo "${markdown}" >> $GITHUB_STEP_SUMMARY
+            console.log('Markdown')
+            console.log(markdown)
+            echo "::set-output name=markdown::${markdown}"
+            echo "${markdown}" >> $GITHUB_STEP_SUMMARY
 
             const artifact = {
               name: 'deployment-frequency',
