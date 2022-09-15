@@ -76,7 +76,7 @@ jobs:
               if (workflowRun.created_at > dateToCompare) {
                 console.log('Workflow run is eligible')
                 eligibleWorkflowsRuns.push(workflowRun)
-                completionDates.push(new Date(workflowRun.completed_at).toISOString().split('T')[0])
+                completionDates.push(workflowRun.completed_at.split('T')[0])
               }
             })
 
