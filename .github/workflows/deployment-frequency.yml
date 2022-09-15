@@ -67,18 +67,19 @@ jobs:
             console.log('Workflow runs count')
             console.log(workflowRuns.data.total_count)
 
-            workflowRuns.data.workflow_runs.forEach((workflowRun) => {
+
+            //Get all workflow runs that were completed after the earliest date
+            for (const workflowRun of workflowRuns.data.workflow_runs) {
               console.log('Workflow run ID')
               console.log(workflowRun.id)
               console.log('Workflow created at')
               console.log(workflowRun.created_at)
-
-              if (workflowRun.created_at > dateToCompare) {
+              if (workflowRun.status === 'completed' && workflowRun.updated_at > dateToCompare) {
                 console.log('Workflow run is eligible')
                 eligibleWorkflowsRuns.push(workflowRun)
-                completionDates.push(workflowRun.completed_at.split('T')[0])
+                completionDates.push(workflowRun.updated_at)
               }
-            })
+            }
 
             console.log('Eligible workflow runs')
             console.log(eligibleWorkflowsRuns)
