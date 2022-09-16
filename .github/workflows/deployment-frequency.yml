@@ -91,7 +91,7 @@ jobs:
 
             let deploymentFrequency = uniqueDates.length / numberOfDays
 
-            let deploymentFrequencyPercentage = Math.round(deploymentFrequency * 100)
+            let deploymentFrequencyPercentage = deploymentFrequency * 100
             let deploymentFrequencyString = ''
             
             if (deploymentFrequency > 1) {
