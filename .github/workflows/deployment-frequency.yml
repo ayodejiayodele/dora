@@ -143,20 +143,25 @@ jobs:
               '## Job Name: ' + jobName + '\n' +
               '## Deployment Frequency: ' + deploymentFrequencyString + '\n' +
               '## Deployment Frequency Percentage: ' + deploymentFrequencyPercentage + '%\n' +
-              '## You deployed ' + eligibleWorkflowsRuns + ' workflows in the last ' + numberOfDays + ' days.\n' +
+              '## You deployed ' + eligibleWorkflowsRuns.length + ' workflows in the last ' + numberOfDays + ' days.\n' +
               '## Color: ${color}\n' +
               '![Deployment Frequency](https://badgen.net/badge/frequency/${encodeURIComponent(deploymentFrequencyString)}/${color}?icon=github&label=Deployment%20frequency)'
 
             console.log('Markdown')
             console.log(markdown)
 
-            console.log(process.env.GITHUB_STEP_SUMMARY)
+            core.exportVariable('MARKDOWN', markdown)
 
             const artifact = {
               name: 'deployment-frequency',
               path: 'deployment-frequency.txt',
               contents: uniqueDates.join('\n')
             }
+            
+      - name: 'Create job summary'
+        run: |
+          echo ${{ env.MARKDOWN }} >> $GITHUB_SUMMARY
+
       - name: 'Upload artifact'
         uses: actions/upload-artifact@v2
         with:
