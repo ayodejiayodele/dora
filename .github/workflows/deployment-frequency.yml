@@ -130,8 +130,8 @@ jobs:
               color = 'green'
             } else {
               deploymentFrequency = 1 / deploymentFrequency
-              deploymentFrequency = Math.round(deploymentFrequency * 100)
-              deploymentFrequencyString = 'Every' + deploymentFrequency + 'days'
+              deploymentFrequency = Math.round(deploymentFrequency)
+              deploymentFrequencyString = 'Every ' + deploymentFrequency + ' days'
               if (deploymentFrequency < 4) {
                 color = 'yellow'
               } else {
@@ -161,7 +161,7 @@ jobs:
 
       - name: 'Create job summary'
         run: |
-          echo "Hello" >> $GITHUB_SUMMARY
+          echo "${{ env.MARKDOWN }}" >> $GITHUB_SUMMARY
 
       - name: 'Upload artifact'
         uses: actions/upload-artifact@v2
