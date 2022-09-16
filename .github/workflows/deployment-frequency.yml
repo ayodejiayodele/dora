@@ -41,32 +41,20 @@ jobs:
             let workflowId = "${{ inputs.workflowName }}"
             let jobName = "${{ inputs.jobname }}"
 
-            if (numberOfDays < 30) {
-              numberOfDays = 30
+            if (numberOfDays < 7) {
+              numberOfDays = 7
             }
-            console.log('Number of days')
-            console.log(numberOfDays)
-            console.log('Workflow ID')
-            console.log(workflowId)
 
             //Remove numberOfDays from the current date
             let earliestDate = new Date()
             earliestDate.setDate(earliestDate.getDate() - numberOfDays)
             let dateToCompare = earliestDate.toISOString()
 
-            console.log('Earliest date')
-            console.log(earliestDate.getDate())
-            console.log(earliestDate.toISOString())
-
             const workflowRuns = await github.rest.actions.listWorkflowRuns({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: workflowId,
             });
-
-            console.log('Workflow runs count')
-            console.log(workflowRuns.data.total_count)
-
 
             //Get all workflow runs that were completed after the earliest date
             for (const workflowRun of workflowRuns.data.workflow_runs) {
@@ -75,11 +63,6 @@ jobs:
                 completionDates.push(workflowRun.updated_at.split('T')[0])
               }
             }
-
-            console.log('Eligible workflow runs count')
-            console.log(eligibleWorkflowsRuns.length)
-            console.log('Completion dates count')
-            console.log(completionDates.length)
 
             //if no jobName is provided, add all eligibleWorkflowsRuns to productWorkflowRuns
             if (jobName === '') {
@@ -100,27 +83,16 @@ jobs:
                 }
               }
             }
-            
-            console.log('Production workflow runs count')
-            console.log(productWorkflowRuns.length)
 
             //uniqueDates = get unique dates from completionDates
             uniqueDates = completionDates.filter((date, index) => {
               return completionDates.indexOf(date) === index
             })
 
-            console.log('Unique dates count')
-            console.log(uniqueDates.length)
-
             let deploymentFrequency = uniqueDates.length / numberOfDays
-
-            console.log('Deployment frequency')
-            console.log(deploymentFrequency)
 
             let deploymentFrequencyPercentage = deploymentFrequency * 100
             let deploymentFrequencyString = ''
-            console.log('Deployment frequency percentage')
-            console.log(deploymentFrequencyPercentage + '%')
             
             if (deploymentFrequency > 1) {
               deploymentFrequencyString = 'Multiple deployments per day'
@@ -143,28 +115,13 @@ jobs:
               '- Job Name: ' + jobName + '\n' +
               '- Deployment Frequency: ' + deploymentFrequencyString + '\n' +
               '- Deployment Frequency Percentage: ' + deploymentFrequencyPercentage + '%\n' +
-              'You deployed **' + productWorkflowRuns.length + ' workflows** in the last ' + numberOfDays + ' days.\n' +
+              'You deployed `' + jobName + '` **' + productWorkflowRuns.length + ' times** in the last ' + numberOfDays + ' days.\n' +
               'Of these ' + numberOfDays + ' days, you deployed on **' + uniqueDates.length + ' days**.\n' +
               '## Badge Color: ' + color + '\n' +
               '![Deployment Frequency](https://badgen.net/badge/frequency/' + encodeURIComponent(deploymentFrequencyString) + '/' + color + '?icon=github&label=Deployment%20frequency)'
 
-            console.log('Markdown')
-            console.log(markdown)
-
             core.exportVariable('MARKDOWN', markdown)
-
-            const artifact = {
-              name: 'deployment-frequency',
-              path: 'deployment-frequency.txt',
-              contents: uniqueDates.join('\n')
-            }
 
       - name: 'Create job summary'
         run: |
           echo "${{ env.MARKDOWN }}" >> $GITHUB_STEP_SUMMARY
-
-      - name: 'Upload artifact'
-        uses: actions/upload-artifact@v2
-        with:
-          name: deployment-frequency
-          path: deployment-frequency.txt
