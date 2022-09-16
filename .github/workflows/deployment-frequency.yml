@@ -91,7 +91,7 @@ jobs:
 
             let deploymentFrequency = uniqueDates.length / numberOfDays
 
-            let deploymentFrequencyPercentage = deploymentFrequency * 100
+            let deploymentFrequencyPercentage = Math.round(deploymentFrequency * 100)
             let deploymentFrequencyString = ''
             
             if (deploymentFrequency > 1) {
@@ -102,7 +102,7 @@ jobs:
               color = 'green'
             } else {
               deploymentFrequency = 1 / deploymentFrequency
-              deploymentFrequency = Math.round(deploymentFrequency * 100) / 100
+              deploymentFrequency = Math.round(deploymentFrequency)
               deploymentFrequencyString = 'Every ' + deploymentFrequency + ' days'
               if (deploymentFrequency < 4) {
                 color = 'yellow'
