@@ -140,17 +140,18 @@ jobs:
             }
 
             let markdown = '## Workflow Name: ' + workflowId + '\n' +
-              '## Job Name: ${{ inputs.jobName }}\n' +
-              '## Deployment Frequency: ${deploymentFrequencyString}\n' +
-              '## Deployment Frequency Percentage: ${deploymentFrequencyPercentage}%\n' +
-              '## Number of days: ${numberOfDays}\n' +
+              '## Job Name: ' + jobName + '\n' +
+              '## Deployment Frequency: ' + deploymentFrequencyString + '\n' +
+              '## Deployment Frequency Percentage: ' + deploymentFrequencyPercentage + '%\n' +
+              '## You deployed ' + eligibleWorkflowsRuns + ' workflows in the last ' + numberOfDays + ' days.\n' +
               '## Color: ${color}\n' +
               '![Deployment Frequency](https://badgen.net/badge/frequency/${encodeURIComponent(deploymentFrequencyString)}/${color}?icon=github&label=Deployment%20frequency)'
 
             console.log('Markdown')
             console.log(markdown)
-            echo "::set-output name=markdown::${markdown}"
-            echo "${markdown}" >> $GITHUB_STEP_SUMMARY
+
+            //append markdown to file content GITHUB_STEP_SUMMARY
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, markdown)
 
             const artifact = {
               name: 'deployment-frequency',
