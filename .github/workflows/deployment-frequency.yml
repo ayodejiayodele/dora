@@ -18,7 +18,7 @@ on:
       numberOfDays:
         description: 'Number of days to check for deployment frequency'
         type: integer
-        default: 30
+        default: 7
         required: false
 
 
@@ -102,7 +102,7 @@ jobs:
               color = 'green'
             } else {
               deploymentFrequency = 1 / deploymentFrequency
-              deploymentFrequency = Math.round(deploymentFrequency)
+              deploymentFrequency = Math.round(deploymentFrequency * 100) / 100
               deploymentFrequencyString = 'Every ' + deploymentFrequency + ' days'
               if (deploymentFrequency < 4) {
                 color = 'yellow'
@@ -111,10 +111,11 @@ jobs:
               }
             }
 
-            let markdown = '## Workflow Name: ' + workflowId + '\n' +
+            let markdown = `## DORA Metric: Deployment Frequency\n' +
+              '- Workflow Name: ' + workflowId + '\n' +
               '- Job Name: ' + jobName + '\n' +
               '- Deployment Frequency: ' + deploymentFrequencyString + '\n' +
-              '- Deployment Frequency Percentage: ' + deploymentFrequencyPercentage + '%\n' +
+              '- Deployment Frequency Percentage: ' + deploymentFrequencyPercentage + '%\n\n' +
               'You deployed `' + jobName + '` **' + productWorkflowRuns.length + ' times** in the last ' + numberOfDays + ' days.\n' +
               'Of these ' + numberOfDays + ' days, you deployed on **' + uniqueDates.length + ' days**.\n' +
               '## Badge Color: ' + color + '\n' +
