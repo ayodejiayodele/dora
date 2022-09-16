@@ -140,12 +140,13 @@ jobs:
             }
 
             let markdown = '## Workflow Name: ' + workflowId + '\n' +
-              '## Job Name: ' + jobName + '\n' +
-              '## Deployment Frequency: ' + deploymentFrequencyString + '\n' +
-              '## Deployment Frequency Percentage: ' + deploymentFrequencyPercentage + '%\n' +
-              '## You deployed ' + eligibleWorkflowsRuns.length + ' workflows in the last ' + numberOfDays + ' days.\n' +
-              '## Color: ${color}\n' +
-              '![Deployment Frequency](https://badgen.net/badge/frequency/${encodeURIComponent(deploymentFrequencyString)}/${color}?icon=github&label=Deployment%20frequency)'
+              '- Job Name: ' + jobName + '\n' +
+              '- Deployment Frequency: ' + deploymentFrequencyString + '\n' +
+              '- Deployment Frequency Percentage: ' + deploymentFrequencyPercentage + '%\n' +
+              'You deployed **' + productWorkflowRuns.length + ' workflows** in the last ' + numberOfDays + ' days.\n' +
+              'Of these ' + numberOfDays + ' days, you deployed on **' + uniqueDates.length + ' days**.\n' +
+              '## Badge Color: ' + color + '\n' +
+              '![Deployment Frequency](https://badgen.net/badge/frequency/' + encodeURIComponent(deploymentFrequencyString) + '/' + color + '?icon=github&label=Deployment%20frequency)'
 
             console.log('Markdown')
             console.log(markdown)
@@ -157,7 +158,7 @@ jobs:
               path: 'deployment-frequency.txt',
               contents: uniqueDates.join('\n')
             }
-            
+
       - name: 'Create job summary'
         run: |
           echo ${{ env.MARKDOWN }} >> $GITHUB_SUMMARY
