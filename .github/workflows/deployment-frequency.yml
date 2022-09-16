@@ -150,8 +150,7 @@ jobs:
             console.log('Markdown')
             console.log(markdown)
 
-            //append markdown to file content GITHUB_STEP_SUMMARY
-            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, markdown)
+            console.log(process.env.GITHUB_STEP_SUMMARY)
 
             const artifact = {
               name: 'deployment-frequency',
