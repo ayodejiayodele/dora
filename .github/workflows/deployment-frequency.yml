@@ -125,7 +125,7 @@ jobs:
             if (deploymentFrequency > 1) {
               deploymentFrequencyString = 'Multiple deployments per day'
               color = 'green'
-            } else if (deploymentFrequency = 1) {
+            } else if (deploymentFrequency == 1) {
               deploymentFrequencyString = 'Daily'
               color = 'green'
             } else {
@@ -161,7 +161,7 @@ jobs:
 
       - name: 'Create job summary'
         run: |
-          echo ${{ env.MARKDOWN }} >> $GITHUB_SUMMARY
+          echo "Hello" >> $GITHUB_SUMMARY
 
       - name: 'Upload artifact'
         uses: actions/upload-artifact@v2
