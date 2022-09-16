@@ -111,7 +111,7 @@ jobs:
               }
             }
 
-            let markdown = `## DORA Metric: Deployment Frequency\n' +
+            let markdown = '## DORA Metric: Deployment Frequency\n' +
               '- Workflow Name: ' + workflowId + '\n' +
               '- Job Name: ' + jobName + '\n' +
               '- Deployment Frequency: ' + deploymentFrequencyString + '\n' +
