@@ -49,11 +49,12 @@ jobs:
             let earliestDate = new Date()
             earliestDate.setDate(earliestDate.getDate() - numberOfDays)
             let dateToCompare = earliestDate.toISOString()
-
+    
             const workflowRuns = await github.rest.actions.listWorkflowRuns({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: workflowId,
+              per_page: 100
             });
 
             //Get all workflow runs that were completed after the earliest date
