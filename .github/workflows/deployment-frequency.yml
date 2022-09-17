@@ -54,7 +54,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: workflowId,
-              per_page: 100
+              per_page: 50
             });
 
             //Get all workflow runs that were completed after the earliest date
