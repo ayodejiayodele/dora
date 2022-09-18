@@ -30,17 +30,14 @@ jobs:
       - name: calculate-workingdays
         run: |
           echo "Calculating working days"
-          //subtract numberOfDays from current date
-          //get current date
+
           currentDate=$(date +%Y-%m-%d)
-          //subtract numberOfDays from currentDate
           startDate=$(date -d "$currentDate - ${{ github.event.inputs.numberOfDays }} days" +%Y-%m-%d)
           workingDaysApi=$(curl --request GET \
           --url 'https://working-days.p.rapidapi.com/list_non_working_days?country_code=AU&start_date='$startDate'&end_date='$currentDate' \
           --header 'X-RapidAPI-Host: working-days.p.rapidapi.com' \
           --header 'X-RapidAPI-Key: ${{ secrets.WORKING_DAYS_API_KEY }}')
 
-          //if workingDaysApi is not empty, then echo result
           if [ -n "$workingDaysApi" ]; then
             echo "Working days API result: $workingDaysApi"
             workingDays=$(echo $workingDaysApi | jq '.non_working_days | length')
