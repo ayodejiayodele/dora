@@ -70,10 +70,10 @@ jobs:
             let completionDates = []
             let uniqueDates = []
             let color = 'red'
-            let numberOfDays =  parseInt("${{ steps.calculate-frequency.outputs.numberOfDays }}")
+            let numberOfDays =  parseInt("${{ steps.calculate-non-workingdays.outputs.numberOfDays }}")
             let workflowId = "${{ inputs.workflowName }}"
             let jobName = "${{ inputs.jobname }}"
-            let numberOfWorkingDays = numberOfDays - parseInt("${{ steps.calculate-frequency.outputs.nonWorkingDays }}")
+            let numberOfWorkingDays = numberOfDays - parseInt("${{ steps.calculate-non-workingdays.outputs.nonWorkingDays }}")
 
             console.log("Number of days: " + numberOfDays)
             console.log("Number of working days: " + numberOfWorkingDays)
