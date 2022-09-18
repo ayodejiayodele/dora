@@ -70,6 +70,103 @@ jobs:
             let completionDates = []
             let uniqueDates = []
             let color = 'red'
-            let numberOfDays =  ${{ steps.calculate-frequency.outputs.numberOfDays }}
+            let numberOfDays =  int("${{ steps.calculate-frequency.outputs.numberOfDays }}")
             let workflowId = "${{ inputs.workflowName }}"
             let jobName = "${{ inputs.jobname }}"
+            let numberOfWorkingDays = numberOfDays - int("${{ steps.calculate-frequency.outputs.nonWorkingDays }}")
+
+            //Remove numberOfDays from the current date
+            let earliestDate = new Date()
+            earliestDate.setDate(earliestDate.getDate() - numberOfDays)
+            let dateToCompare = earliestDate.toISOString()
+    
+            const workflowRuns = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: workflowId,
+              per_page: 50
+            });
+            console.log('Total workflow runs: ' + workflowRuns.data.total_count)
+            //Get all workflow runs that were completed after the earliest date
+            for (const workflowRun of workflowRuns.data.workflow_runs) {
+              if (workflowRun.status === 'completed' && workflowRun.updated_at > dateToCompare) {
+                eligibleWorkflowsRuns.push(workflowRun)
+                completionDates.push(workflowRun.updated_at.split('T')[0])
+              }
+            }
+
+            //if no jobName is provided, add all eligibleWorkflowsRuns to productWorkflowRuns
+            if (jobName === '') {
+              productWorkflowRuns = eligibleWorkflowsRuns
+            } else {
+              //Get all workflow runs that have the jobName
+              for (const workflowRun of eligibleWorkflowsRuns) {
+                const jobs = await github.rest.actions.listJobsForWorkflowRun({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  run_id: workflowRun.id,
+                });
+
+                for (const job of jobs.data.jobs) {
+                  if (job.name === jobName) {
+                    productWorkflowRuns.push(workflowRun)
+                  }
+                }
+              }
+            }
+
+            //uniqueDates = get unique dates from completionDates
+            uniqueDates = completionDates.filter((date, index) => {
+              return completionDates.indexOf(date) === index
+            })
+
+            let deploymentFrequency = uniqueDates.length / numberOfWorkingDays
+
+            let deploymentFrequencyPercentage = Math.round(deploymentFrequency * 100)
+            let deploymentFrequencyString = ''
+            let doraClassification = ''
+            
+            if (deploymentFrequency > 1) {
+              deploymentFrequencyString = 'Multiple deployments per day'
+              color = 'green'
+              doraClassification = 'Elite'
+            } else if (deploymentFrequency == 1) {
+              deploymentFrequencyString = 'Daily'
+              color = 'green'
+              doraClassification = 'Elite'
+            } else {
+              deploymentFrequency = 1 / deploymentFrequency
+              deploymentFrequency = Math.round(deploymentFrequency)
+              deploymentFrequencyString = 'Every ' + deploymentFrequency + ' days'
+              if (deploymentFrequency < 5) { //More than once per week (5 working days)
+                color = 'green'
+                doraClassification = 'Elite'
+              } else if (deploymentFrequency >= 5 && deploymentFrequency <= 30) { //Once per week to once per month
+                color = 'yellow'
+                doraClassification = 'High'
+              } else if (deploymentFrequency > 30 && deploymentFrequency <= 180) { //Once per month to once every 6 months
+                color = 'red'
+                doraClassification = 'Medium'
+              } else {
+                color = 'red'
+                doraClassification = 'Low'
+              }
+            }
+
+            let markdown = '## DORA Metric: Deployment Frequency\n' +
+              '- Workflow Name: ' + workflowId + '\n' +
+              '- Job Name: ' + jobName + '\n' +
+              '- Deployment Frequency: ' + deploymentFrequencyString + '\n' +
+              '- Deployment Frequency Percentage: ' + deploymentFrequencyPercentage + '%\n\n' +
+              'You deployed _' + jobName + '_ **' + productWorkflowRuns.length + ' times** in the last ' + numberOfDays + ' days.\n' +
+              'Of these ' + numberOfDays + ' days, you deployed on **' + uniqueDates.length + ' days**. excluding non-working days.\n\n' +
+              'There are **' + numberOfWorkingDays + ' working days** in the last ' + numberOfDays + ' days.\n' +
+              'This is a **' + doraClassification + '** deployment frequency.\n\n' +
+              '## DORA Classification: ' + doraClassification + '\n' +
+              '![Deployment Frequency](https://badgen.net/badge/frequency/' + encodeURIComponent(deploymentFrequencyString) + '/' + color + '?icon=github&label=Deployment%20frequency)'
+
+            core.exportVariable('MARKDOWN', markdown)
+
+      - name: 'Create job summary'
+        run: |
+          echo "${{ env.MARKDOWN }}" >> $GITHUB_STEP_SUMMARY
