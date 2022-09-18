@@ -75,6 +75,8 @@ jobs:
             let jobName = "${{ inputs.jobname }}"
             let numberOfWorkingDays = numberOfDays - parseInt("${{ steps.calculate-frequency.outputs.nonWorkingDays }}")
 
+            console.log("Number of days: " + numberOfDays)
+            console.log("Number of working days: " + numberOfWorkingDays)
             //Remove numberOfDays from the current date
             let earliestDate = new Date()
             earliestDate.setDate(earliestDate.getDate() - numberOfDays)
