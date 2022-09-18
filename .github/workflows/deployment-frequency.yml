@@ -60,6 +60,11 @@ jobs:
           fi
           echo "::set-output name=nonWorkingDays::$nonWorkingDays"
           echo "::set-output name=numberOfDays::$numberOfDays"
+      - name: Diagnosis
+        run: |
+          echo "Diagnosis"
+          echo "Non-working days: ${{ steps.calculate-frequency.outputs.nonWorkingDays }}"
+          echo "Number of days: ${{ steps.calculate-frequency.outputs.numberOfDays }}"
       - name: 'Get Workflows and Jobs'
         uses: actions/github-script@v6
         with:
