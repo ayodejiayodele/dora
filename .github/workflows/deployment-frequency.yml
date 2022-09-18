@@ -93,17 +93,18 @@ jobs:
             });
 
             workflowRuns = workflowRuns.concat(tempworkflowRuns.data.workflow_runs)
+            console.log(tempworkflowRuns.data.total_count)
 
             //loop until workflowRuns total count is less than resultsPerpage
             while (parseInt(tempworkflowRuns.data.total_count) == resultsPerpage) {
-              page++
+              pageNumber++
               const tempworkflowRuns = await github.rest.actions.listWorkflowRuns({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 workflow_id: workflowId,
                 status: 'success',
                 per_page: resultsPerpage,
-                page: page
+                page: pageNumber
               });
               workflowRuns = workflowRuns.concat(tempworkflowRuns.data.workflow_runs)
               console.log("Page: " + page + " Total count: " + tempworkflowRuns.data.total_count)
