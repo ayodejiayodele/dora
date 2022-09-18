@@ -34,7 +34,6 @@ jobs:
           numberOfDays=${{ github.event.inputs.numberOfDays }}
           if [ -z "$numberOfDays" ]; then
             numberOfDays=7
-          fi
           elif [ $numberOfDays -lt 7 ]; then
             numberOfDays=7
           fi
