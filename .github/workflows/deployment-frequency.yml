@@ -46,7 +46,7 @@ jobs:
           if [ -n "$workingDaysApi" ]; then
             echo "Working days API result: $workingDaysApi"
             nonWorkingDays=$(echo $workingDaysApi | jq 'result.non_working_days | length')
-            echo "Working days: $nonWorkingDays"
+            echo "Non-working days: $nonWorkingDays"
           else
             echo "Working days API result is empty"
             nonWorkingDays=0
