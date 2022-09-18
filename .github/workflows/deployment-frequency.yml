@@ -27,9 +27,17 @@ jobs:
   calculate-frequency:
     runs-on: ubuntu-latest
     steps:
-      - name: calculate-workingdays
+      - name: calculate-non-workingdays
         run: |
-          echo "Calculating working days"
+          echo "Calculating non-working days"
+
+          numberOfDays=${{ github.event.inputs.numberOfDays }}
+          if [ -z "$numberOfDays" ]; then
+            numberOfDays=7
+          fi
+          elif [ $numberOfDays -lt 7 ]; then
+            numberOfDays=7
+          fi
 
           currentDate=$(date +%Y-%m-%d)
           startDate=$(date -d "$currentDate - ${{ github.event.inputs.numberOfDays }} days" +%Y-%m-%d)
@@ -51,6 +59,8 @@ jobs:
             echo "Working days API result is empty"
             nonWorkingDays=0
           fi
+          echo "::set-output name=nonWorkingDays::$nonWorkingDays"
+          echo "::set-output name=numberOfDays::$numberOfDays"
       - name: 'Get Workflows and Jobs'
         uses: actions/github-script@v6
         with:
@@ -61,13 +71,10 @@ jobs:
             let completionDates = []
             let uniqueDates = []
             let color = 'red'
-            let numberOfDays =  ${{ inputs.numberOfDays }}
+            let numberOfDays =  ${{ steps.calculate-frequency.outputs.numberOfDays }}
             let workflowId = "${{ inputs.workflowName }}"
             let jobName = "${{ inputs.jobname }}"
-
-            if (numberOfDays < 7) {
-              numberOfDays = 7
-            }
+            let numberOfWorkingDays = numberOfDays - ${{ steps.calculate-frequency.outputs.nonWorkingDays }}
 
             //Remove numberOfDays from the current date
             let earliestDate = new Date()
@@ -114,25 +121,36 @@ jobs:
               return completionDates.indexOf(date) === index
             })
 
-            let deploymentFrequency = uniqueDates.length / numberOfDays
+            let deploymentFrequency = uniqueDates.length / numberOfWorkingDays
 
             let deploymentFrequencyPercentage = Math.round(deploymentFrequency * 100)
             let deploymentFrequencyString = ''
+            let doraClassification = ''
             
             if (deploymentFrequency > 1) {
               deploymentFrequencyString = 'Multiple deployments per day'
               color = 'green'
+              doraClassification = 'Elite'
             } else if (deploymentFrequency == 1) {
               deploymentFrequencyString = 'Daily'
               color = 'green'
+              doraClassification = 'Elite'
             } else {
               deploymentFrequency = 1 / deploymentFrequency
               deploymentFrequency = Math.round(deploymentFrequency)
               deploymentFrequencyString = 'Every ' + deploymentFrequency + ' days'
-              if (deploymentFrequency < 4) {
+              if (deploymentFrequency < 5) { //More than once per week (5 working days)
+                color = 'green'
+                doraClassification = 'Elite'
+              } else if (deploymentFrequency >= 5 && deploymentFrequency <= 30) { //Once per week to once per month
                 color = 'yellow'
+                doraClassification = 'High'
+              } else if (deploymentFrequency > 30 && deploymentFrequency <= 180) { //Once per month to once every 6 months
+                color = 'red'
+                doraClassification = 'Medium'
               } else {
                 color = 'red'
+                doraClassification = 'Low'
               }
             }
 
@@ -142,8 +160,10 @@ jobs:
               '- Deployment Frequency: ' + deploymentFrequencyString + '\n' +
               '- Deployment Frequency Percentage: ' + deploymentFrequencyPercentage + '%\n\n' +
               'You deployed _' + jobName + '_ **' + productWorkflowRuns.length + ' times** in the last ' + numberOfDays + ' days.\n' +
-              'Of these ' + numberOfDays + ' days, you deployed on **' + uniqueDates.length + ' days**.\n' +
-              '## Badge Color: ' + color + '\n' +
+              'Of these ' + numberOfDays + ' days, you deployed on **' + uniqueDates.length + ' days**. excluding non-working days.\n\n' +
+              'There are **' + numberOfWorkingDays + ' working days** in the last ' + numberOfDays + ' days.\n' +
+              'This is a **' + doraClassification + '** deployment frequency.\n\n' +
+              '## DORA Classification: ' + doraClassification + '\n' +
               '![Deployment Frequency](https://badgen.net/badge/frequency/' + encodeURIComponent(deploymentFrequencyString) + '/' + color + '?icon=github&label=Deployment%20frequency)'
 
             core.exportVariable('MARKDOWN', markdown)
