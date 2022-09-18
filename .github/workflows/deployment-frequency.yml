@@ -45,11 +45,11 @@ jobs:
 
           if [ -n "$workingDaysApi" ]; then
             echo "Working days API result: $workingDaysApi"
-            workingDays=$(echo $workingDaysApi | jq '.non_working_days | length')
-            echo "Working days: $workingDays"
+            nonWorkingDays=$(echo $workingDaysApi | jq 'result.non_working_days | length')
+            echo "Working days: $nonWorkingDays"
           else
             echo "Working days API result is empty"
-            workingDays=0
+            nonWorkingDays=0
           fi
       - name: 'Get Workflows and Jobs'
         uses: actions/github-script@v6
