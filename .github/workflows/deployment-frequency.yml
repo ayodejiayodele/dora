@@ -107,7 +107,7 @@ jobs:
                 page: pageNumber
               });
               workflowRuns = workflowRuns.concat(tempworkflowRuns.data.workflow_runs)
-              console.log("Page: " + page + " Total count: " + tempworkflowRuns.data.total_count)
+              console.log("Page: " + pageNumber + " Total count: " + tempworkflowRuns.data.total_count)
             }
 
             //Get all workflow runs that were completed after the earliest date
