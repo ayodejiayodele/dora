@@ -70,10 +70,10 @@ jobs:
             let completionDates = []
             let uniqueDates = []
             let color = 'red'
-            let numberOfDays =  int("${{ steps.calculate-frequency.outputs.numberOfDays }}")
+            let numberOfDays =  parseInt("${{ steps.calculate-frequency.outputs.numberOfDays }}")
             let workflowId = "${{ inputs.workflowName }}"
             let jobName = "${{ inputs.jobname }}"
-            let numberOfWorkingDays = numberOfDays - int("${{ steps.calculate-frequency.outputs.nonWorkingDays }}")
+            let numberOfWorkingDays = numberOfDays - parseInt("${{ steps.calculate-frequency.outputs.nonWorkingDays }}")
 
             //Remove numberOfDays from the current date
             let earliestDate = new Date()
