@@ -167,9 +167,9 @@ jobs:
               '- Deployment Frequency: ' + deploymentFrequencyString + '\n' +
               '- Deployment Frequency Percentage: ' + deploymentFrequencyPercentage + '%\n\n' +
               'You deployed _' + jobName + '_ **' + productWorkflowRuns.length + ' times** in the last ' + numberOfDays + ' days.\n' +
-              'Of these ' + numberOfDays + ' days, you deployed on **' + uniqueDates.length + ' days**. excluding non-working days.\n\n' +
+              'Of these ' + numberOfDays + ' days, you deployed on **' + uniqueDates.length + ' days** excluding non-working days.\n\n' +
               'There are **' + numberOfWorkingDays + ' working days** in the last ' + numberOfDays + ' days.\n' +
-              'This is a **' + doraClassification + '** deployment frequency.\n\n' +
+              'This is **' + doraClassification + '** deployment frequency.\n\n' +
               '## DORA Classification: ' + doraClassification + '\n' +
               '![Deployment Frequency](https://badgen.net/badge/frequency/' + encodeURIComponent(deploymentFrequencyString) + '/' + color + '?icon=github&label=Deployment%20frequency)'
 
