@@ -33,8 +33,13 @@ jobs:
 
           currentDate=$(date +%Y-%m-%d)
           startDate=$(date -d "$currentDate - ${{ github.event.inputs.numberOfDays }} days" +%Y-%m-%d)
+
+          echo "startDate: $startDate"
+          echo "currentDate: $currentDate"
+          echo "numberOfDays: ${{ github.event.inputs.numberOfDays }}"
+
           workingDaysApi=$(curl --request GET \
-          --url 'https://working-days.p.rapidapi.com/list_non_working_days?country_code=AU&start_date=$startDate&end_date=$currentDate' \
+          --url 'https://working-days.p.rapidapi.com/list_non_working_days?country_code=AU&start_date='$startDate'&end_date='$currentDate \
           --header 'X-RapidAPI-Host: working-days.p.rapidapi.com' \
           --header 'X-RapidAPI-Key: ${{ secrets.WORKING_DAYS_API_KEY }}')
 
@@ -46,10 +51,6 @@ jobs:
             echo "Working days API result is empty"
             workingDays=0
           fi
-
-          echo "startDate: $startDate"
-          echo "currentDate: $currentDate"
-          echo "numberOfDays: ${{ github.event.inputs.numberOfDays }}"
       - name: 'Get Workflows and Jobs'
         uses: actions/github-script@v6
         with:
