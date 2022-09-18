@@ -80,23 +80,42 @@ jobs:
             let workflowId = "${{ inputs.workflowName }}"
             let jobName = "${{ inputs.jobname }}"
             let numberOfWorkingDays = numberOfDays - parseInt("${{ steps.calculate-non-workingdays.outputs.nonWorkingDays }}")
+            let resultsPerpage = 50
+            let pageNumber = 1
+            let workflowRuns = []
 
-            console.log("Number of days: " + numberOfDays)
-            console.log("Number of working days: " + numberOfWorkingDays)
             //Remove numberOfDays from the current date
             let earliestDate = new Date()
             earliestDate.setDate(earliestDate.getDate() - numberOfDays)
             let dateToCompare = earliestDate.toISOString()
     
-            const workflowRuns = await github.rest.actions.listWorkflowRuns({
+            const tempworkflowRuns = await github.rest.actions.listWorkflowRuns({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: workflowId,
-              per_page: 50
+              status: 'success',
+              per_page: resultsPerpage
             });
-            console.log('Total workflow runs: ' + workflowRuns.data.total_count)
+
+            workflowRuns.push(tempworkflowRuns.data.workflow_runs)
+
+            //loop until workflowRuns total count is less than resultsPerpage
+            while (tempworkflowRuns.data.total_count == resultsPerpage) {
+              page++
+              const tempworkflowRuns = await github.rest.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: workflowId,
+                status: 'success',
+                per_page: resultsPerpage,
+                page: page
+              });
+              workflowRuns.push(tempworkflowRuns.data.workflow_runs)
+              console.log("Page: " + page + " Total count: " + tempworkflowRuns.data.total_count)
+            }
+
             //Get all workflow runs that were completed after the earliest date
-            for (const workflowRun of workflowRuns.data.workflow_runs) {
+            for (const workflowRun of workflowRuns) {
               if (workflowRun.status === 'completed' && workflowRun.updated_at > dateToCompare) {
                 eligibleWorkflowsRuns.push(workflowRun)
                 completionDates.push(workflowRun.updated_at.split('T')[0])
