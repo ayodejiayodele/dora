@@ -34,7 +34,7 @@ jobs:
           currentDate=$(date +%Y-%m-%d)
           startDate=$(date -d "$currentDate - ${{ github.event.inputs.numberOfDays }} days" +%Y-%m-%d)
           workingDaysApi=$(curl --request GET \
-          --url 'https://working-days.p.rapidapi.com/list_non_working_days?country_code=AU&start_date='$startDate'&end_date='$currentDate' \
+          --url 'https://working-days.p.rapidapi.com/list_non_working_days?country_code=AU&start_date=$startDate&end_date=$currentDate' \
           --header 'X-RapidAPI-Host: working-days.p.rapidapi.com' \
           --header 'X-RapidAPI-Key: ${{ secrets.WORKING_DAYS_API_KEY }}')
 
