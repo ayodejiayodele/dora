@@ -28,6 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: calculate-non-workingdays
+        id: calculate-non-workingdays
         run: |
           echo "Calculating non-working days"
 
