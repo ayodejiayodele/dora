@@ -56,7 +56,7 @@ jobs:
               workflow_id: workflowId,
               per_page: 50
             });
-
+            console.log('Total workflow runs: ' + workflowRuns.data.total_count)
             //Get all workflow runs that were completed after the earliest date
             for (const workflowRun of workflowRuns.data.workflow_runs) {
               if (workflowRun.status === 'completed' && workflowRun.updated_at > dateToCompare) {
