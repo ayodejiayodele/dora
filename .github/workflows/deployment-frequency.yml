@@ -55,10 +55,6 @@ on:
         type: number
         default: 7
         required: false
-    secrets:
-      githubToken:
-        description: 'GitHub token, required for private repositories'
-        required: false
 jobs:
   calculate-frequency:
     runs-on: ubuntu-latest
