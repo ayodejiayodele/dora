@@ -3,6 +3,11 @@ name: Deployment Frequency
 on:
   workflow_call:
     inputs: 
+      owner:
+        description: 'Repository owner'
+        type: string
+        required: true
+        default: 'ayodejiayodele'
       repo:
         description: 'Repository name'
         type: string
@@ -21,8 +26,17 @@ on:
         type: number
         default: 7
         required: false
+    secrets:
+      githubToken:
+        description: 'GitHub token, required for private repositories'
+        required: false
   workflow_dispatch:
     inputs: 
+      owner:
+        description: 'Repository owner'
+        type: string
+        required: true
+        default: 'ayodejiayodele'
       repo:
         description: 'Repository name'
         type: string
@@ -92,10 +106,12 @@ jobs:
             let completionDates = []
             let uniqueDates = []
             let color = 'red'
+            let owner = '${{ github.event.inputs.owner }}' ? '${{ github.event.inputs.owner }}' : context.repo.owner
+            let repo = '${{ github.event.inputs.repo }}' ? '${{ github.event.inputs.repo }}' : context.repo.repo
             let numberOfDays =  parseInt("${{ steps.calculate-non-workingdays.outputs.numberOfDays }}")
-            let workflowId = "${{ inputs.workflowName }}"
-            let jobName = "${{ inputs.jobname }}"
-            let numberOfWorkingDays = numberOfDays - parseInt("${{ steps.calculate-non-workingdays.outputs.nonWorkingDays }}")
+            let workflowId = '${{ inputs.workflowName }}'
+            let jobName = '${{ inputs.jobname }}'
+            let numberOfWorkingDays = numberOfDays - parseInt('${{ steps.calculate-non-workingdays.outputs.nonWorkingDays }}')
             let resultsPerpage = 50
             let pageNumber = 1
             let workflowRuns = []
@@ -106,8 +122,8 @@ jobs:
             let dateToCompare = earliestDate.toISOString()
     
             const tempworkflowRuns = await github.rest.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
+              owner: owner,
+              repo: repo,
               workflow_id: workflowId,
               status: 'success',
               per_page: resultsPerpage
@@ -120,8 +136,8 @@ jobs:
             while (workflowRuns.length < tempworkflowRuns.data.total_count) {
               pageNumber++
               const tempworkflowRuns = await github.rest.actions.listWorkflowRuns({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
+                owner: owner,
+                repo: repo,
                 workflow_id: workflowId,
                 status: 'success',
                 per_page: resultsPerpage,
@@ -146,8 +162,8 @@ jobs:
               //Get all workflow runs that have the jobName
               for (const workflowRun of eligibleWorkflowsRuns) {
                 const jobs = await github.rest.actions.listJobsForWorkflowRun({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
+                  owner: owner,
+                  repo: repo,
                   run_id: workflowRun.id,
                 });
 
