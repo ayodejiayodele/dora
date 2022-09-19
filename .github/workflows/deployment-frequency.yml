@@ -63,9 +63,8 @@ jobs:
         id: calculate-non-workingdays
         run: |
           echo "Calculating non-working days"
-          echo "Number of days specified: $INPUT_NUMBEROFDAYS"
-          echo "Number 2: ${{ inputs.numberOfDays }}"
-          numberOfDays=${{ github.event.inputs.numberOfDays }}
+
+          numberOfDays=${{ inputs.numberOfDays }}
           if [ -z "$numberOfDays" ]; then
             numberOfDays=7
             echo "Number of days is empty"
