@@ -55,10 +55,10 @@ on:
         type: number
         default: 7
         required: false
-
-env:
-  GITHUB_TOKEN: ${{ secrets.githubToken }} ? ${{ secrets.githubToken }} : ${{ github.token }}
-
+    secrets:
+      githubToken:
+        description: 'GitHub token, required for private repositories'
+        required: false
 jobs:
   calculate-frequency:
     runs-on: ubuntu-latest
@@ -97,10 +97,18 @@ jobs:
           fi
           echo "::set-output name=nonWorkingDays::$nonWorkingDays"
           echo "::set-output name=numberOfDays::$numberOfDays"
+
+          if [ -z "${{ secrets.githubtoken }}" ]; then
+            echo "githubtoken is not set"
+            echo "::set-output name=githubtoken::${{ github.token }}"
+          else
+            echo "githubtoken is set"
+            echo "::set-output name=githubtoken::${{ secrets.githubtoken }}"
+          fi
       - name: 'Get Workflows and Jobs'
         uses: actions/github-script@v6
         with:
-          github-token: ${{ env.GITHUB_TOKEN }}
+          github-token: ${{ steps.calculate-non-workingdays.outputs.githubtoken }}
           script: |
 
             let productWorkflowRuns = []
