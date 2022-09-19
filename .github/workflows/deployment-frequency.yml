@@ -98,6 +98,9 @@ jobs:
           echo "::set-output name=nonWorkingDays::$nonWorkingDays"
           echo "::set-output name=numberOfDays::$numberOfDays"
 
+      - name: set-token
+        id: set-token
+        run: |
           if [ -z "${{ secrets.githubtoken }}" ]; then
             echo "githubtoken is not set"
             echo "::set-output name=githubtoken::${{ github.token }}"
@@ -108,7 +111,7 @@ jobs:
       - name: 'Get Workflows and Jobs'
         uses: actions/github-script@v6
         with:
-          github-token: ${{ steps.calculate-non-workingdays.outputs.githubtoken }}
+          github-token: ${{ steps.set-token.outputs.githubtoken }}
           script: |
 
             let productWorkflowRuns = []
