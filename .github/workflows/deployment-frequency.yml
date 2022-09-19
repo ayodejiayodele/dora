@@ -1,10 +1,11 @@
 name: Deployment Frequency
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs: 
       repo:
         description: 'Repository name'
+        type: string
         required: true
         default: 'dora'
       workflowName:
@@ -17,7 +18,27 @@ on:
         required: false
       numberOfDays:
         description: 'Number of days to check for deployment frequency'
-        type: integer
+        type: number
+        default: 7
+        required: false
+  workflow_dispatch:
+    inputs: 
+      repo:
+        description: 'Repository name'
+        type: string
+        required: true
+        default: 'dora'
+      workflowName:
+        description: 'Workflow name of yaml filename'
+        required: true 
+        type: string
+      jobname:
+        description: 'Job name responsible for production deployment'
+        type: string
+        required: false
+      numberOfDays:
+        description: 'Number of days to check for deployment frequency'
+        type: number
         default: 7
         required: false
 
