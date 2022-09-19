@@ -74,11 +74,11 @@ jobs:
           fi
 
           currentDate=$(date +%Y-%m-%d)
-          startDate=$(date -d "$currentDate - ${{ github.event.inputs.numberOfDays }} days" +%Y-%m-%d)
+          startDate=$(date -d "$currentDate - ${{ inputs.numberOfDays }} days" +%Y-%m-%d)
 
           echo "startDate: $startDate"
           echo "currentDate: $currentDate"
-          echo "numberOfDays: ${{ github.event.inputs.numberOfDays }}"
+          echo "numberOfDays: ${{ inputs.numberOfDays }}"
 
           workingDaysApi=$(curl --request GET \
           --url 'https://working-days.p.rapidapi.com/list_non_working_days?country_code=AU&start_date='$startDate'&end_date='$currentDate \
@@ -117,8 +117,8 @@ jobs:
             let completionDates = []
             let uniqueDates = []
             let color = 'red'
-            let owner = '${{ github.event.inputs.owner }}' ? '${{ github.event.inputs.owner }}' : context.repo.owner
-            let repo = '${{ github.event.inputs.repo }}' ? '${{ github.event.inputs.repo }}' : context.repo.repo
+            let owner = '${{ inputs.owner }}' ? '${{ inputs.owner }}' : context.repo.owner
+            let repo = '${{ inputs.repo }}' ? '${{ inputs.repo }}' : context.repo.repo
             let numberOfDays =  parseInt("${{ steps.calculate-non-workingdays.outputs.numberOfDays }}")
             let workflowId = '${{ inputs.workflowName }}'
             let jobName = '${{ inputs.jobname }}'
