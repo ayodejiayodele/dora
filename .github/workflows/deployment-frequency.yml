@@ -64,7 +64,7 @@ jobs:
         run: |
           echo "Calculating non-working days"
           echo "Number of days specified: $INPUT_NUMBEROFDAYS"
-          echo "Number 2: ${{ github.event.inputs.numberOfDays }}"
+          echo "Number 2: ${{ inputs.numberOfDays }}"
           numberOfDays=${{ github.event.inputs.numberOfDays }}
           if [ -z "$numberOfDays" ]; then
             numberOfDays=7
