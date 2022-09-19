@@ -99,6 +99,7 @@ jobs:
       - name: 'Get Workflows and Jobs'
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.githubToken }} ?? ${{ github.token }}
           script: |
 
             let productWorkflowRuns = []
