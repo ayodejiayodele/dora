@@ -67,8 +67,10 @@ jobs:
           numberOfDays=${{ github.event.inputs.numberOfDays }}
           if [ -z "$numberOfDays" ]; then
             numberOfDays=7
+            echo "Number of days is empty"
           elif [ $numberOfDays -lt 7 ]; then
             numberOfDays=7
+            echo "Number of days is less than 7"
           fi
 
           currentDate=$(date +%Y-%m-%d)
