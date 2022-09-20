@@ -7,27 +7,17 @@ Calculate your deployment frequency, one of DORA's four key metrics.
 Specify your details to the workflow of your production deployment for the primary business or service. If you have multiple workflows, specify the primary one that denotes a completion of the deployment. Optionally, you can specify the particular job in the workflow.
 
 ``` yml
-on:
-  workflow_call:
-    inputs: 
-      repo:
-        description: 'Repository name'
-        type: string
-        required: true
-        default: 'dora'
-      workflowName:
-        description: 'Workflow name of yaml filename'
-        required: true 
-        type: string
-      jobname:
-        description: 'Job name responsible for production deployment'
-        type: string
-        required: false
-      numberOfDays:
-        description: 'Number of days to check for deployment frequency'
-        type: number
-        default: 7
-        required: false
+jobs:
+  # This workflow contains a single job called "build"
+  get-dora:
+    uses: ayodejiayodele/dora/.github/workflows/deployment-frequency.yml@main
+    with:
+      owner: ayodejiayodele
+      repo: repotest
+      workflowName: ci-cd-myapp.yml
+      numberOfDays: 70
+    secrets:
+      githubToken: ${{ secrets.YOUR_REPO_READONLY_SECRET }}
 ```
 
 ## Sample result
