@@ -17,7 +17,7 @@ jobs:
       workflowName: ci-cd-myapp.yml
       numberOfDays: 70
     secrets:
-      githubToken: ${{ secrets.YOUR_REPO_READONLY_SECRET }}
+      githubToken: ${{ secrets.YOUR_REPO_READONLY_PAT }}
 ```
 
 ## Sample result
