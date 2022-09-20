@@ -81,9 +81,7 @@ jobs:
           echo "numberOfDays: ${{ inputs.numberOfDays }}"
 
           workingDaysApi=$(curl --request GET \
-          --url 'https://working-days.p.rapidapi.com/list_non_working_days?country_code=AU&start_date='$startDate'&end_date='$currentDate \
-          --header 'X-RapidAPI-Host: working-days.p.rapidapi.com' \
-          --header 'X-RapidAPI-Key: ${{ secrets.WORKING_DAYS_API_KEY }}')
+          --url 'https://prod-12.centralus.logic.azure.com:443/workflows/2024ff0c98b845a3979665f6e1a890c8/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=itl7PsdcSnc6SriLgOA7kJeKL-8M8zivcRtZnjVF6eM?country=AU&startdate='$startDate'&enddate='$currentDate \
 
           if [ -n "$workingDaysApi" ]; then
             echo "Working days API result: $workingDaysApi"
