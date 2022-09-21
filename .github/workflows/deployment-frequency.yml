@@ -276,6 +276,28 @@ jobs:
           echo "::set-output name=productionRunsFile::productionWorkflowRuns.json"
           echo "${{ env.DEPLOYMENT_FREQUENCY }}" > deploymentFrequency.json
           echo "${{ env.MARKDOWN }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: 'Publish artifact'
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: deployment-frequency
+          path: deploymentFrequency.json
+
+      - name: 'Publish artifact production runs'
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: production-workflow-runs
+          path: productionWorkflowRuns.json
+
+
+  calculate-lead-time:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Download artifact'
+        uses: actions/download-artifact@v2
+        with:
+          name: production-workflow-runs
+          path: productionWorkflowRuns.json
       
       - name: 'Calculate lead time for changes'
         id: calculate-lead-time
@@ -288,9 +310,3 @@ jobs:
             const fs = require('fs');
             const workflowRuns = JSON.parse(fs.readFileSync('productionWorkflowRuns.json', 'utf8'));
             console.log(workflowRuns)
-
-      - name: 'Publish artifact'
-        uses: actions/upload-artifact@v3.1.0
-        with:
-          name: deployment-frequency
-          path: deploymentFrequency.json
