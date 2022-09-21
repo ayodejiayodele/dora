@@ -271,7 +271,7 @@ jobs:
           path: deploymentFrequency.json
   calculate-lead-time:
     runs-on: ubuntu-latest
-    needs: [calculate-deployment-frequency]
+    needs: calculate-frequency
     steps:
       - name: 'Get commits of production runs'
         uses: actions/github-script@v6
