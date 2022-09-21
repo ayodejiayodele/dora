@@ -58,6 +58,9 @@ on:
 jobs:
   calculate-frequency:
     runs-on: ubuntu-latest
+    outputs:
+      nonWorkingDays: ${{ steps.calculate-non-workingdays.outputs.nonWorkingDays }}
+      productionRuns: ${{ steps.create-json.outputs.productionRuns }}
     steps:
       - name: calculate-non-workingdays
         id: calculate-non-workingdays
@@ -224,27 +227,21 @@ jobs:
 
             //Create a json file with the results
             const data = {
-              "owner": owner,
-              "repo": repo,
-              "workflowName": workflowId,
-              "jobName": jobName,
-              "deploymentFrequency": deploymentFrequencyString,
-              "deploymentFrequencyPercentage": deploymentFrequencyPercentage,
-              "doraClassification": doraClassification,
-              "color": color,
+              "owner": "\"" + owner + "\"",
+              "repo": "\"" + repo + "\"",
+              "workflowName": "\"" + workflowId + "\"",
+              "jobName": "\"" + jobName + "\"",
+              "deploymentFrequency": "\"" + deploymentFrequencyString + "\"",
+              "deploymentFrequencyPercentage": "\"" + deploymentFrequencyPercentage + "\"",
+              "doraClassification": "\"" + doraClassification + "\"",
+              "color": "\"" + color + "\"",
               "numberOfDays": numberOfDays,
               "numberOfWorkingDays": numberOfWorkingDays,
             //  "workflowRuns": productionWorkflowRuns,
-              "uniqueDeploymentDates": uniqueDates
+              "uniqueDeploymentDates": uniqueDates.map(date => "\"" + date + "\"")
             }
-            core.exportVariable('DEPLOYMENT_FREQUENCY', JSON.stringify(data, function(key,value){
-              if (typeof value === 'string') {
-                return """ + value + """
-              }
-              else {
-                return value
-              }
-            }, 2));
+            core.exportVariable('DEPLOYMENT_FREQUENCY', JSON.stringify(data, null, 2));
+            core.exportVariable('PRODUCTION_WORKFLOW_RUNS', productionWorkflowRuns);
 
             let markdown = '## DORA Metric: Deployment Frequency\n' +
               '- Workflow Name: ' + workflowId + '\n' +
@@ -261,7 +258,9 @@ jobs:
             core.exportVariable('MARKDOWN', markdown)
 
       - name: 'Create json and job summary'
+        id: 'create-json'
         run: |
+          echo "::set-output name=productionRuns::${PRODUCTION_WORKFLOW_RUNS}"
           echo "${{ env.DEPLOYMENT_FREQUENCY }}" > deploymentFrequency.json
           echo "${{ env.MARKDOWN }}" >> $GITHUB_STEP_SUMMARY
       
@@ -270,4 +269,15 @@ jobs:
         with:
           name: deployment-frequency
           path: deploymentFrequency.json
-
+  calculate-lead-time:
+    runs-on: ubuntu-latest
+    needs: [calculate-deployment-frequency]
+    steps:
+      - name: 'Get commits of production runs'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ steps.set-token.outputs.githubtoken }}
+          script: |
+            //workflowRuns = job output from calculate-deployment-frequency
+            const workflowRuns = ${{ needs.calculate-deployment-frequency.outputs.productionRuns }}
+            console.log(workflowRuns)
