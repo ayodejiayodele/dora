@@ -110,7 +110,7 @@ jobs:
           github-token: ${{ steps.set-token.outputs.githubtoken }}
           script: |
 
-            let productWorkflowRuns = []
+            let productionWorkflowRuns = []
             let eligibleWorkflowsRuns = []
             let completionDates = []
             let uniqueDates = []
@@ -164,9 +164,9 @@ jobs:
               }
             }
 
-            //if no jobName is provided, add all eligibleWorkflowsRuns to productWorkflowRuns
+            //if no jobName is provided, add all eligibleWorkflowsRuns to productionWorkflowRuns
             if (jobName === '') {
-              productWorkflowRuns = eligibleWorkflowsRuns
+              productionWorkflowRuns = eligibleWorkflowsRuns
             } else {
               //Get all workflow runs that have the jobName
               for (const workflowRun of eligibleWorkflowsRuns) {
@@ -178,7 +178,7 @@ jobs:
 
                 for (const job of jobs.data.jobs) {
                   if (job.name === jobName) {
-                    productWorkflowRuns.push(workflowRun)
+                    productionWorkflowRuns.push(workflowRun)
                   }
                 }
               }
@@ -222,12 +222,29 @@ jobs:
               }
             }
 
+            //Create a json file with the results
+            const data = {
+              "owner": owner,
+              "repo": repo,
+              "workflowName": workflowId,
+              "jobName": jobName,
+              "deploymentFrequency": deploymentFrequencyString,
+              "deploymentFrequencyPercentage": deploymentFrequencyPercentage,
+              "doraClassification": doraClassification,
+              "color": color,
+              "numberOfDays": numberOfDays,
+              "numberOfWorkingDays": numberOfWorkingDays,
+            //  "workflowRuns": productionWorkflowRuns,
+              "uniqueDeploymentDates": uniqueDates
+            }
+            core.exportVariable('DEPLOYMENT_FREQUENCY', JSON.stringify(data));
+
             let markdown = '## DORA Metric: Deployment Frequency\n' +
               '- Workflow Name: ' + workflowId + '\n' +
               '- Job Name: ' + jobName + '\n' +
               '- Deployment Frequency: ' + deploymentFrequencyString + '\n' +
               '- Deployment Frequency Percentage: ' + deploymentFrequencyPercentage + '%\n\n' +
-              'You deployed _' + jobName + '_ **' + productWorkflowRuns.length + ' times** in the last ' + numberOfDays + ' days.\n' +
+              'You deployed _' + jobName + '_ **' + productionWorkflowRuns.length + ' times** in the last ' + numberOfDays + ' days.\n' +
               'Of these ' + numberOfDays + ' days, you deployed on **' + uniqueDates.length + ' days** excluding non-working days.\n\n' +
               'There are **' + numberOfWorkingDays + ' working days** in the last ' + numberOfDays + ' days.\n' +
               'This is **' + doraClassification + '** deployment frequency.\n\n' +
@@ -236,6 +253,14 @@ jobs:
 
             core.exportVariable('MARKDOWN', markdown)
 
-      - name: 'Create job summary'
+      - name: 'Create json and job summary'
         run: |
+          echo ${{ env.DEPLOYMENT_FREQUENCY }} > deploymentFrequency.json
           echo "${{ env.MARKDOWN }}" >> $GITHUB_STEP_SUMMARY
+      
+      - name: 'Publish artifact'
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: deployment-frequency
+          path: deploymentFrequency.json
+
