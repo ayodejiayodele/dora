@@ -297,7 +297,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: production-workflow-runs
-          path: productionWorkflowRuns.json
       
       - name: 'Calculate lead time for changes'
         id: calculate-lead-time
