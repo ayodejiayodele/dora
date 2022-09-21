@@ -127,6 +127,7 @@ jobs:
             let resultsPerpage = 50
             let pageNumber = 1
             let workflowRuns = []
+            let headSHAs = []
 
             //Remove numberOfDays from the current date
             let earliestDate = new Date()
@@ -240,8 +241,18 @@ jobs:
             //  "workflowRuns": productionWorkflowRuns,
               "uniqueDeploymentDates": uniqueDates.map(date => "\"" + date + "\"")
             }
-            core.exportVariable('DEPLOYMENT_FREQUENCY', JSON.stringify(data, null, 2));
-            core.exportVariable('PRODUCTION_WORKFLOW_RUNS', productionWorkflowRuns);
+            core.exportVariable('DEPLOYMENT_FREQUENCY', JSON.stringify(data, null, 2))
+  
+            //for each productionWorkflowRun, get the head SHA and add it to headSHAs
+            for (const workflowRun of productionWorkflowRuns) {
+              const workflowRunDetails = await github.rest.actions.getWorkflowRun({
+                owner: owner,
+                repo: repo,
+                run_id: workflowRun.id,
+              });
+              headSHAs.push(workflowRunDetails.data.head_sha)
+            }
+            core.exportVariable('PRODUCTION_WORKFLOW_RUNS', JSON.stringify(headSHAs, null, 2))
 
             let markdown = '## DORA Metric: Deployment Frequency\n' +
               '- Workflow Name: ' + workflowId + '\n' +
@@ -260,24 +271,26 @@ jobs:
       - name: 'Create json and job summary'
         id: 'create-json'
         run: |
-          echo "::set-output name=productionRuns::${PRODUCTION_WORKFLOW_RUNS}"
+          echo "Creating json file"
+          echo "${{ env.PRODUCTION_WORKFLOW_RUNS }}" > productionWorkflowRuns.json
+          echo "::set-output name=productionRunsFile::productionWorkflowRuns.json"
           echo "${{ env.DEPLOYMENT_FREQUENCY }}" > deploymentFrequency.json
           echo "${{ env.MARKDOWN }}" >> $GITHUB_STEP_SUMMARY
       
+      - name: 'Calculate lead time for changes'
+        id: calculate-lead-time:
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ steps.set-token.outputs.githubtoken }}
+          script: |
+
+            //workflowRuns = read json file productionWorkflowRuns.json and parse it
+            const fs = require('fs');
+            const workflowRuns = JSON.parse(fs.readFileSync('productionWorkflowRuns.json', 'utf8'));
+            console.log(workflowRuns)
+
       - name: 'Publish artifact'
         uses: actions/upload-artifact@v3.1.0
         with:
           name: deployment-frequency
           path: deploymentFrequency.json
-  calculate-lead-time:
-    runs-on: ubuntu-latest
-    needs: calculate-frequency
-    steps:
-      - name: 'Get commits of production runs'
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ steps.set-token.outputs.githubtoken }}
-          script: |
-            //workflowRuns = job output from calculate-deployment-frequency
-            const workflowRuns = ${{ needs.calculate-deployment-frequency.outputs.productionRuns }}
-            console.log(workflowRuns)
