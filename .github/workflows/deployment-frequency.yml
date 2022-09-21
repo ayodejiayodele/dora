@@ -292,6 +292,7 @@ jobs:
 
   calculate-lead-time:
     runs-on: ubuntu-latest
+    needs: calculate-frequency
     steps:
       - name: 'Download artifact'
         uses: actions/download-artifact@v2
