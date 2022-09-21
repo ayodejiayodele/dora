@@ -318,6 +318,8 @@ jobs:
           github-token: ${{ steps.set-token.outputs.githubtoken }}
           script: |
 
+            let workflowId = '${{ inputs.workflowName }}'
+            let jobName = '${{ inputs.jobname }}'
             let owner = '${{ inputs.owner }}' ? '${{ inputs.owner }}' : context.repo.owner
             let repo = '${{ inputs.repo }}' ? '${{ inputs.repo }}' : context.repo.repo
             let totalLeadTime = 0
