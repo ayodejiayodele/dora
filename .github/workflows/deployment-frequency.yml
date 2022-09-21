@@ -426,7 +426,7 @@ jobs:
             for (const commitRecord of commitRecords) {
               markdown += '| ' + commitRecord["\"run_id\""] + ' | ' + commitRecord["\"title\""] + ' | ' + commitRecord["\"commit_sha\""] + ' | ' + commitRecord["\"committed_at\""] + ' | ' + commitRecord["\"updated_at\""] + ' | ' + commitRecord["\"lead_time\""] + ' |\n'
             }
-            markdown = markdown.replace('"', '')
+            markdown = markdown.replace(/"/g, '')
 
             core.exportVariable('MARKDOWN', markdown)
 
