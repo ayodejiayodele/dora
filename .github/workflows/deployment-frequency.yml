@@ -228,18 +228,18 @@ jobs:
 
             //Create a json file with the results
             const data = {
-              "owner": "\"" + owner + "\"",
-              "repo": "\"" + repo + "\"",
-              "workflowName": "\"" + workflowId + "\"",
-              "jobName": "\"" + jobName + "\"",
-              "deploymentFrequency": "\"" + deploymentFrequencyString + "\"",
-              "deploymentFrequencyPercentage": "\"" + deploymentFrequencyPercentage + "\"",
-              "doraClassification": "\"" + doraClassification + "\"",
-              "color": "\"" + color + "\"",
-              "numberOfDays": numberOfDays,
-              "numberOfWorkingDays": numberOfWorkingDays,
+              "\"owner\"": "\"" + owner + "\"",
+              "\"repo\"": "\"" + repo + "\"",
+              "\"workflowName\"": "\"" + workflowId + "\"",
+              "\"jobName\"": "\"" + jobName + "\"",
+              "\"deploymentFrequency\"": "\"" + deploymentFrequencyString + "\"",
+              "\"deploymentFrequencyPercentage\"": "\"" + deploymentFrequencyPercentage + "\"",
+              "\"doraClassification\"": "\"" + doraClassification + "\"",
+              "\"color\"": "\"" + color + "\"",
+              "\"numberOfDays\"": numberOfDays,
+              "\"numberOfWorkingDays\"": numberOfWorkingDays,
             //  "workflowRuns": productionWorkflowRuns,
-              "uniqueDeploymentDates": uniqueDates.map(date => "\"" + date + "\"")
+              "\"uniqueDeploymentDates\"": uniqueDates.map(date => "\"" + date + "\"")
             }
             core.exportVariable('DEPLOYMENT_FREQUENCY', JSON.stringify(data, null, 2))
   
@@ -252,7 +252,7 @@ jobs:
               });
               headSHAs.push(workflowRunDetails.data.head_sha)
             }
-            core.exportVariable('PRODUCTION_WORKFLOW_RUNS', JSON.stringify(headSHAs, null, 2))
+            core.exportVariable('PRODUCTION_WORKFLOW_RUNS', JSON.stringify(headSHAs.map(headsha => "\"" + headsha + "\""), null, 2))
 
             let markdown = '## DORA Metric: Deployment Frequency\n' +
               '- Workflow Name: ' + workflowId + '\n' +
