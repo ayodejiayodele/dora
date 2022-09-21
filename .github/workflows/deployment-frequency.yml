@@ -371,10 +371,71 @@ jobs:
                   commitRecords.push(commitRecord)
                 }
               }
-              console.log(commitRecords)
-            }
+             core.exportVariable('LEAD_TIME', JSON.stringify(commitRecords, null, 2))
+           }
 
             console.log("Total lead time: " + totalLeadTime + " hours")
             console.log("Number of commits: " + commitRecords.length)
             averageLeadTime = totalLeadTime / commitRecords.length
             console.log("Average lead time: " + averageLeadTime + " hours")
+
+            let doraClassification = ''
+            let color = ''
+            let leadTimeString = ''
+
+            if (averageLeadTime <= 1) {
+              doraClassification = 'Elite'
+              color = 'green'
+              leadTimeString = 'Less than one hour'
+            } else if (averageLeadTime > 1 && averageLeadTime <= 24) {
+              doraClassification = 'Elite'
+              color = 'green'
+              leadTimeString = '1 day'
+            }else if (averageLeadTime > 24 && averageLeadTime <= 168) { // 168 hours = 7 days
+              doraClassification = 'High'
+              color = 'green'
+              leadTimeString = averageLeadTime / 24 + ' days'
+            } else if (averageLeadTime > 168 && averageLeadTime <= 720) { //30 days
+              doraClassification = 'Medium'
+              color = 'yellow'
+              leadTimeString = averageLeadTime / 24 + ' days'
+            } else if (averageLeadTime > 720 && averageLeadTime <= 4320) { //6 months
+              doraClassification = 'Medium'
+              color = 'yellow'
+              leadTimeString = averageLeadTime / 24 / 30 + ' months'
+            } else { // > 6 months
+              doraClassification = 'Low'
+              color = 'red'
+              leadTimeString = 'More than 6 months'
+            }
+
+            let markdown = '## DORA Metric: Lead Time for Changes\n' +
+              '- Workflow Name: ' + workflowId + '\n' +
+              '- Job Name: ' + jobName + '\n' +
+              '- Number of workflow runs: ' + workflowRunHeadSHAs.length + '\n' +
+              '- Number of commits: ' + commitRecords.length + '\n' +
+              '- Average lead time: ' + averageLeadTime + ' hours\n\n' 
+              '## DORA Classification: ' + doraClassification + '\n' +
+              '![Lead Time](https://badgen.net/badge/leadtime/' + encodeURIComponent(leadTimeString) + '/' + color + '?icon=github&label=Lead%20time)' + '\n\n' 
+            
+            //for each commitRecord, add to markdown
+            markdown += '| Run ID | Title | Commit SHA | Committed At | Updated At | Lead Time |\n' +
+              '| --- | --- | --- | --- | --- | --- |\n'
+            for (const commitRecord of commitRecords) {
+              markdown += '| ' + commitRecord["\"run_id\""] + ' | ' + commitRecord["\"title\""] + ' | ' + commitRecord["\"commit_sha\""] + ' | ' + commitRecord["\"committed_at\""] + ' | ' + commitRecord["\"updated_at\""] + ' | ' + commitRecord["\"lead_time\""] + ' hours |\n'
+            }
+
+            core.exportVariable('MARKDOWN', markdown)
+
+      - name: 'Create json and job summary'
+        id: 'create-json'
+        run: |
+          echo "Creating json file"
+          echo "${{ env.LEAD_TIME }}" > leadTime.json
+          echo "${{ env.MARKDOWN }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: 'Publish artifact'
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: lead-time
+          path: leadTime.json
