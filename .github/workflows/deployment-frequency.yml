@@ -298,6 +298,17 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: production-workflow-runs
+
+      - name: set-token
+        id: set-token
+        run: |
+          if [ -z "${{ secrets.githubtoken }}" ]; then
+            echo "githubtoken is not set"
+            echo "::set-output name=githubtoken::${{ github.token }}"
+          else
+            echo "githubtoken is set"
+            echo "::set-output name=githubtoken::${{ secrets.githubtoken }}"
+          fi
       
       - name: 'Calculate lead time for changes'
         id: calculate-lead-time
