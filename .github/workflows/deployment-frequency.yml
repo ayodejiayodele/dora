@@ -364,7 +364,7 @@ jobs:
                   const commitRecord = {
                     "\"run_id\"": "\"" + run.id + "\"",
                     "\"title\"": "\"" + run.title + "\"",
-                    "\"commit_sha\"": "\"" + parent.sha +" `parent`\"",
+                    "\"commit_sha\"": "\"" + parent.sha +" <<parent>>`\"",
                     "\"committed_at\"": "\"" + parentCommitDetails.data.commit.committer.date + "\"",
                     "\"updated_at\"": "\"" + run.updated_at + "\"",
                     "\"lead_time\"": "\"" + leadTime + " hours\""
@@ -428,7 +428,7 @@ jobs:
             }
             markdown +=  '| | | | | **Total Lead Time** | ' + totalLeadTime + ' hours |\n' +
               '| | | | | **Average Lead Time** | ' + averageLeadTime + ' hours |\n'
-              
+
             markdown = markdown.replace(/"/g, '')
 
             core.exportVariable('MARKDOWN', markdown)
