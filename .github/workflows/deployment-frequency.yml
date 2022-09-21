@@ -237,7 +237,7 @@ jobs:
             //  "workflowRuns": productionWorkflowRuns,
               "uniqueDeploymentDates": uniqueDates
             }
-            core.exportVariable('DEPLOYMENT_FREQUENCY', JSON.stringify(data));
+            core.exportVariable('DEPLOYMENT_FREQUENCY', JSON.stringify(data, null, 2));
 
             let markdown = '## DORA Metric: Deployment Frequency\n' +
               '- Workflow Name: ' + workflowId + '\n' +
