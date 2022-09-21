@@ -278,7 +278,7 @@ jobs:
           echo "${{ env.MARKDOWN }}" >> $GITHUB_STEP_SUMMARY
       
       - name: 'Calculate lead time for changes'
-        id: calculate-lead-time:
+        id: calculate-lead-time
         uses: actions/github-script@v6
         with:
           github-token: ${{ steps.set-token.outputs.githubtoken }}
