@@ -419,7 +419,7 @@ jobs:
               '- Average lead time: ' + averageLeadTime + ' hours\n\n' +
               '## DORA Classification: ' + doraClassification + '\n' +
               '![Lead Time](https://badgen.net/badge/leadtime/' + encodeURIComponent(leadTimeString) + '/' + color + '?icon=github&label=Lead%20time)' + '\n\n' 
-            console.log(context.repo)
+            console.log(context)
             //for each commitRecord, add to markdown
             markdown += '| Run ID | Title | Commit SHA | Committed At | Updated At | Lead Time |\n' +
               '| --- | --- | --- | --- | --- | --- |\n'
