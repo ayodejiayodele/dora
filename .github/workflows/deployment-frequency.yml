@@ -420,11 +420,15 @@ jobs:
               '## DORA Classification: ' + doraClassification + '\n' +
               '![Lead Time](https://badgen.net/badge/leadtime/' + encodeURIComponent(leadTimeString) + '/' + color + '?icon=github&label=Lead%20time)' + '\n\n' 
 
+            if (commitRecords.length > 10) {
+              //use expandable section to hide commit details if too many commit records
+              markdown += '<details><summary>Click to expand commit records</summary>\n\n</details>'
+            }
             //for each commitRecord, add to markdown
             markdown += '| Run ID | Title | Commit SHA | Committed At | Updated At | Lead Time |\n' +
               '| --- | --- | --- | --- | --- | --- |\n'
             for (const commitRecord of commitRecords) {
-              let commitText = commitRecord["\"commit_sha\""].indexOf("parent") > 1 ? commitRecord["\"commit_sha\""].substring(0,7).concat(" (parent)") : commitRecord["\"commit_sha\""].substring(0,7) 
+              let commitText = commitRecord["\"commit_sha\""].indexOf("parent") > 1 ? commitRecord["\"commit_sha\""].substring(0,8).concat(" (parent)") : commitRecord["\"commit_sha\""].substring(0,8) 
               console.log(commitText)
               let commitLink = '[' + commitText + '](' + context.payload.repository.url + '/commit/' + commitRecord["\"commit_sha\""].replace(" (parent)","") + ')'
               console.log(commitLink)
@@ -432,7 +436,10 @@ jobs:
             }
             markdown +=  '| | | | | **Total Lead Time** | ' + totalLeadTime + ' hours |\n' +
               '| | | | | **Average Lead Time** | ' + averageLeadTime + ' hours |\n'
-
+            if (commitRecords.length > 10) {
+              markdown +=    '\n\n</details>'
+            }
+            
             markdown = markdown.replace(/"/g, '')
 
             core.exportVariable('MARKDOWN', markdown)
@@ -440,6 +447,7 @@ jobs:
       - name: 'Create json and job summary'
         run: |
           echo "Creating json file"
+          echo "${{ env.LEAD_TIME }}" > leadTime.json
           echo "${{ env.MARKDOWN }}" >> $GITHUB_STEP_SUMMARY
 
       - name: 'Publish artifact'
