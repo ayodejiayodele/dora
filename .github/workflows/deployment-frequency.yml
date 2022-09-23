@@ -430,7 +430,7 @@ jobs:
             for (const commitRecord of commitRecords) {
               let commitText = commitRecord["\"commit_sha\""].indexOf("parent") > 1 ? commitRecord["\"commit_sha\""].substring(1,8).concat(" (parent)") : commitRecord["\"commit_sha\""].substring(1,8) 
               console.log(commitText)
-              let commitLink = '[' + commitText + '](' + context.payload.repository.url + '/commit/' + commitRecord["\"commit_sha\""].replace(" (parent)","") + ')'
+              let commitLink = '[' + commitText + '](' + context.payload.repository.html_url + '/commit/' + commitRecord["\"commit_sha\""].replace(" (parent)","") + ')'
               console.log(commitLink)
               markdown += '| ' + commitRecord["\"run_id\""] + ' | ' + commitRecord["\"title\""] + ' | ' + commitLink + ' | ' + commitRecord["\"committed_at\""] + ' | ' + commitRecord["\"updated_at\""] + ' | ' + commitRecord["\"lead_time\""] + ' |\n'
             }
