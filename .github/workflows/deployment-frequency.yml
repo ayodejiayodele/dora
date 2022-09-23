@@ -424,13 +424,7 @@ jobs:
             markdown += '| Run ID | Title | Commit SHA | Committed At | Updated At | Lead Time |\n' +
               '| --- | --- | --- | --- | --- | --- |\n'
             for (const commitRecord of commitRecords) {
-              markdown += '| ' + commitRecord["\"run_id\""] 
-              + ' | ' + commitRecord["\"title\""] 
-              + ' | [' + commitRecord["\"commit_sha\""].contains("parent")? commitRecord["\"commit_sha\""].substring(0,7) & " (parent)" : commitRecord["\"commit_sha\""].substring(0,7) commitRecord["\"commit_sha\""].substring(0,7) + '](' + context.github.repositoryUrl + '/' + commitRecord["\"commit_sha\""] + ') | ' 
-              + commitRecord["\"committed_at\""] 
-              + ' | ' + commitRecord["\"updated_at\""] 
-              + ' | ' + commitRecord["\"lead_time\""] 
-              + ' |\n'
+              markdown += '| ' + commitRecord["\"run_id\""] + ' | ' + commitRecord["\"title\""] + ' | [' + commitRecord["\"commit_sha\""].contains("parent")? commitRecord["\"commit_sha\""].substring(0,7) & " (parent)" : commitRecord["\"commit_sha\""].substring(0,7) commitRecord["\"commit_sha\""].substring(0,7) + '](' + context.github.repositoryUrl + '/' + commitRecord["\"commit_sha\""] + ') | ' + commitRecord["\"committed_at\""] + ' | ' + commitRecord["\"updated_at\""] + ' | ' + commitRecord["\"lead_time\""] + ' |\n'
             }
             markdown +=  '| | | | | **Total Lead Time** | ' + totalLeadTime + ' hours |\n' +
               '| | | | | **Average Lead Time** | ' + averageLeadTime + ' hours |\n'
