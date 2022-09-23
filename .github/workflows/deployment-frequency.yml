@@ -441,6 +441,10 @@ jobs:
         run: |
           echo "Creating json file"
           echo "${{ env.LEAD_TIME }}" > leadTime.json
+ 
+      - name: 'Create job summary'
+        run: |
+          echo "Creating summary file"
           echo "${{ env.MARKDOWN }}" >> $GITHUB_STEP_SUMMARY
 
       - name: 'Publish artifact'
