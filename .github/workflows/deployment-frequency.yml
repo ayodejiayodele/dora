@@ -440,13 +440,14 @@ jobs:
               markdown +=    '\n\n</details>'
             }
 
-            //markdown = markdown.replace(/"/g, '')
+            markdown = markdown.replace(/"/g, '')
 
             core.exportVariable('MARKDOWN', markdown)
 
       - name: 'Create json and job summary'
         run: |
           echo "Creating json file"
+          echo "${{ env.LEAD_TIME }}" > leadTime.json
           echo "${{ env.MARKDOWN }}" >> $GITHUB_STEP_SUMMARY
 
       - name: 'Publish artifact'
