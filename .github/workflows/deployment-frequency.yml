@@ -58,6 +58,9 @@ on:
 jobs:
   calculate-frequency:
     runs-on: ubuntu-latest
+    outputs:
+      nonWorkingDays: ${{ steps.calculate-non-workingdays.outputs.nonWorkingDays }}
+      productionRuns: ${{ steps.create-json.outputs.productionRuns }}
     steps:
       - name: calculate-non-workingdays
         id: calculate-non-workingdays
@@ -110,7 +113,7 @@ jobs:
           github-token: ${{ steps.set-token.outputs.githubtoken }}
           script: |
 
-            let productWorkflowRuns = []
+            let productionWorkflowRuns = []
             let eligibleWorkflowsRuns = []
             let completionDates = []
             let uniqueDates = []
@@ -124,6 +127,7 @@ jobs:
             let resultsPerpage = 50
             let pageNumber = 1
             let workflowRuns = []
+            let headSHAs = []
 
             //Remove numberOfDays from the current date
             let earliestDate = new Date()
@@ -164,9 +168,9 @@ jobs:
               }
             }
 
-            //if no jobName is provided, add all eligibleWorkflowsRuns to productWorkflowRuns
+            //if no jobName is provided, add all eligibleWorkflowsRuns to productionWorkflowRuns
             if (jobName === '') {
-              productWorkflowRuns = eligibleWorkflowsRuns
+              productionWorkflowRuns = eligibleWorkflowsRuns
             } else {
               //Get all workflow runs that have the jobName
               for (const workflowRun of eligibleWorkflowsRuns) {
@@ -178,7 +182,7 @@ jobs:
 
                 for (const job of jobs.data.jobs) {
                   if (job.name === jobName) {
-                    productWorkflowRuns.push(workflowRun)
+                    productionWorkflowRuns.push(workflowRun)
                   }
                 }
               }
@@ -222,12 +226,41 @@ jobs:
               }
             }
 
+            //Create a json file with the results
+            const data = {
+              "\"owner\"": "\"" + owner + "\"",
+              "\"repo\"": "\"" + repo + "\"",
+              "\"workflowName\"": "\"" + workflowId + "\"",
+              "\"jobName\"": "\"" + jobName + "\"",
+              "\"deploymentFrequency\"": "\"" + deploymentFrequencyString + "\"",
+              "\"deploymentFrequencyPercentage\"": "\"" + deploymentFrequencyPercentage + "\"",
+              "\"doraClassification\"": "\"" + doraClassification + "\"",
+              "\"color\"": "\"" + color + "\"",
+              "\"numberOfDays\"": numberOfDays,
+              "\"numberOfWorkingDays\"": numberOfWorkingDays,
+            //  "workflowRuns": productionWorkflowRuns,
+              "\"uniqueDeploymentDates\"": uniqueDates.map(date => "\"" + date + "\"")
+            }
+            core.exportVariable('DEPLOYMENT_FREQUENCY', JSON.stringify(data, null, 2))
+  
+            //for each productionWorkflowRun, get the head SHA and add it to headSHAs
+            for (const workflowRun of productionWorkflowRuns) {
+              const prodWorkflowRun = {
+                "\"id\"": "\"" + workflowRun.id + "\"",
+                "\"title\"": "\"" + workflowRun.name + "\"",
+                "\"head_sha\"": "\"" + workflowRun.head_sha + "\"",
+                "\"updated_at\"": "\"" + workflowRun.updated_at + "\""
+              }
+              headSHAs.push(prodWorkflowRun)
+            }
+            core.exportVariable('PRODUCTION_WORKFLOW_RUNS', JSON.stringify(headSHAs, null, 2))
+
             let markdown = '## DORA Metric: Deployment Frequency\n' +
               '- Workflow Name: ' + workflowId + '\n' +
               '- Job Name: ' + jobName + '\n' +
               '- Deployment Frequency: ' + deploymentFrequencyString + '\n' +
               '- Deployment Frequency Percentage: ' + deploymentFrequencyPercentage + '%\n\n' +
-              'You deployed _' + jobName + '_ **' + productWorkflowRuns.length + ' times** in the last ' + numberOfDays + ' days.\n' +
+              'You deployed _' + jobName + '_ **' + productionWorkflowRuns.length + ' times** in the last ' + numberOfDays + ' days.\n' +
               'Of these ' + numberOfDays + ' days, you deployed on **' + uniqueDates.length + ' days** excluding non-working days.\n\n' +
               'There are **' + numberOfWorkingDays + ' working days** in the last ' + numberOfDays + ' days.\n' +
               'This is **' + doraClassification + '** deployment frequency.\n\n' +
@@ -236,6 +269,189 @@ jobs:
 
             core.exportVariable('MARKDOWN', markdown)
 
-      - name: 'Create job summary'
+      - name: 'Create json and job summary'
+        id: 'create-json'
         run: |
+          echo "Creating json file"
+          echo "${{ env.PRODUCTION_WORKFLOW_RUNS }}" > productionWorkflowRuns.json
+          echo "::set-output name=productionRunsFile::productionWorkflowRuns.json"
+          echo "${{ env.DEPLOYMENT_FREQUENCY }}" > deploymentFrequency.json
           echo "${{ env.MARKDOWN }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: 'Publish artifact'
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: deployment-frequency
+          path: deploymentFrequency.json
+
+      - name: 'Publish artifact production runs'
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: production-workflow-runs
+          path: productionWorkflowRuns.json
+
+
+  calculate-lead-time:
+    runs-on: ubuntu-latest
+    needs: calculate-frequency
+    steps:
+      - name: 'Download artifact'
+        uses: actions/download-artifact@v2
+        with:
+          name: production-workflow-runs
+
+      - name: set-token
+        id: set-token
+        run: |
+          if [ -z "${{ secrets.githubtoken }}" ]; then
+            echo "githubtoken is not set"
+            echo "::set-output name=githubtoken::${{ github.token }}"
+          else
+            echo "githubtoken is set"
+            echo "::set-output name=githubtoken::${{ secrets.githubtoken }}"
+          fi
+      
+      - name: 'Calculate lead time for changes'
+        id: calculate-lead-time
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ steps.set-token.outputs.githubtoken }}
+          script: |
+
+            let workflowId = '${{ inputs.workflowName }}'
+            let jobName = '${{ inputs.jobname }}'
+            let owner = '${{ inputs.owner }}' ? '${{ inputs.owner }}' : context.repo.owner
+            let repo = '${{ inputs.repo }}' ? '${{ inputs.repo }}' : context.repo.repo
+            let totalLeadTime = 0
+            let averageLeadTime = 0
+
+            //workflowRunHeadSHAs = read json file productionWorkflowRuns.json and parse it
+            const fs = require('fs');
+            const workflowRunHeadSHAs = JSON.parse(fs.readFileSync('productionWorkflowRuns.json', 'utf8'));
+
+            //for each headSHA in workflowRunHeadSHAs, get commit details and calculate lead time
+            const commitRecords = []
+            for (const run of workflowRunHeadSHAs) {
+              const commitDetails = await github.rest.repos.getCommit({
+                owner: owner,
+                repo: repo,
+                ref: run.head_sha,
+              });
+
+              //if commitDetails is not null and commitDetails.parents.length = 1, calculate lead time
+              if (commitDetails && commitDetails.data.parents.length == 1) {
+                const leadTime = (new Date(run.updated_at) - new Date(commitDetails.data.commit.committer.date)) / 1000 / 60 / 60
+                const commitRecord = {
+                  "\"run_id\"": "\"" + run.id + "\"",
+                  "\"title\"": "\"" + run.title + "\"",
+                  "\"commit_sha\"": "\"" + run.head_sha + "\"",
+                  "\"committed_at\"": "\"" + commitDetails.data.commit.committer.date + "\"",
+                  "\"updated_at\"": "\"" + run.updated_at + "\"",
+                  "\"lead_time\"": "\"" + leadTime + " hours\""
+                }
+                totalLeadTime += leadTime
+                commitRecords.push(commitRecord)
+              } else if (commitDetails && commitDetails.data.parents.length > 1) {
+                //if commitDetails is not null and commitDetails.parents.length > 1, calculate lead time for each parent
+                for (const parent of commitDetails.data.parents) {
+                  const parentCommitDetails = await github.rest.repos.getCommit({
+                    owner: owner,
+                    repo: repo,
+                    ref: parent.sha,
+                  });
+                  const leadTime = (new Date(run.updated_at) - new Date(parentCommitDetails.data.commit.committer.date)) / 1000 / 60 / 60
+
+                  const commitRecord = {
+                    "\"run_id\"": "\"" + run.id + "\"",
+                    "\"title\"": "\"" + run.title + "\"",
+                    "\"commit_sha\"": "\"" + parent.sha +" parent\"",
+                    "\"committed_at\"": "\"" + parentCommitDetails.data.commit.committer.date + "\"",
+                    "\"updated_at\"": "\"" + run.updated_at + "\"",
+                    "\"lead_time\"": "\"" + leadTime + " hours\""
+                  }
+                  totalLeadTime += leadTime
+                  commitRecords.push(commitRecord)
+                }
+              }
+              core.exportVariable('LEAD_TIME', JSON.stringify(commitRecords, null, 2))
+            }
+
+            console.log("Total lead time: " + totalLeadTime + " hours")
+            console.log("Number of commits: " + commitRecords.length)
+            averageLeadTime = totalLeadTime / commitRecords.length
+            console.log("Average lead time: " + averageLeadTime + " hours")
+
+            let doraClassification = ''
+            let color = ''
+            let leadTimeString = ''
+
+            if (averageLeadTime <= 1) {
+              doraClassification = 'Elite'
+              color = 'green'
+              leadTimeString = 'Less than one hour'
+            } else if (averageLeadTime > 1 && averageLeadTime <= 24) {
+              doraClassification = 'Elite'
+              color = 'green'
+              leadTimeString = '1 day'
+            }else if (averageLeadTime > 24 && averageLeadTime <= 168) { // 168 hours = 7 days
+              doraClassification = 'High'
+              color = 'green'
+              leadTimeString = averageLeadTime / 24 + ' days'
+            } else if (averageLeadTime > 168 && averageLeadTime <= 720) { //30 days
+              doraClassification = 'Medium'
+              color = 'yellow'
+              leadTimeString = averageLeadTime / 24 + ' days'
+            } else if (averageLeadTime > 720 && averageLeadTime <= 4320) { //6 months
+              doraClassification = 'Medium'
+              color = 'yellow'
+              leadTimeString = averageLeadTime / 24 / 30 + ' months'
+            } else { // > 6 months
+              doraClassification = 'Low'
+              color = 'red'
+              leadTimeString = 'More than 6 months'
+            }
+
+            let markdown = '## DORA Metric: Lead Time for Changes\n' +
+              '- Workflow Name: ' + workflowId + '\n' +
+              '- Job Name: ' + jobName + '\n' +
+              '- Number of workflow runs: ' + workflowRunHeadSHAs.length + '\n' +
+              '- Number of commits: ' + commitRecords.length + '\n' +
+              '- Average lead time: ' + averageLeadTime + ' hours\n\n' +
+              '## DORA Classification: ' + doraClassification + '\n' +
+              '![Lead Time](https://badgen.net/badge/leadtime/' + encodeURIComponent(leadTimeString) + '/' + color + '?icon=github&label=Lead%20time)' + '\n\n' 
+
+            if (commitRecords.length > 10) {
+              //use expandable section to hide commit details if too many commit records
+              markdown += '<details><summary>Click to expand commit records</summary>\n\n'
+            }
+            //for each commitRecord, add to markdown
+            markdown += '| Run ID | Title | Commit SHA | Committed At | Updated At | Lead Time |\n' +
+              '| --- | --- | --- | --- | --- | --- |\n'
+            for (const commitRecord of commitRecords) {
+              let commitText = commitRecord["\"commit_sha\""].indexOf("parent") > 1 ? commitRecord["\"commit_sha\""].substring(1,8).concat(" (parent)") : commitRecord["\"commit_sha\""].substring(1,8) 
+              console.log(commitText)
+              let commitLink = '[' + commitText + '](' + context.payload.repository.html_url + '/commit/' + commitRecord["\"commit_sha\""].replace(" parent","") + ')'
+              console.log(commitLink)
+              markdown += '| ' + commitRecord["\"run_id\""] + ' | ' + commitRecord["\"title\""] + ' | ' + commitLink + ' | ' + commitRecord["\"committed_at\""] + ' | ' + commitRecord["\"updated_at\""] + ' | ' + commitRecord["\"lead_time\""] + ' |\n'
+            }
+            markdown +=  '| | | | | **Total Lead Time** | ' + totalLeadTime + ' hours |\n' +
+              '| | | | | **Average Lead Time** | ' + averageLeadTime + ' hours |\n'
+            if (commitRecords.length > 10) {
+              markdown +=    '\n\n</details>'
+            }
+
+            markdown = markdown.replace(/"/g, '')
+
+            core.exportVariable('MARKDOWN', markdown)
+
+      - name: 'Create json and job summary'
+        run: |
+          echo "Creating json file"
+          echo "${{ env.LEAD_TIME }}" > leadTime.json
+          echo "${{ env.MARKDOWN }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: 'Publish artifact'
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: lead-time
+          path: leadTime.json
