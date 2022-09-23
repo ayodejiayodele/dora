@@ -422,7 +422,7 @@ jobs:
 
             if (commitRecords.length > 10) {
               //use expandable section to hide commit details if too many commit records
-              markdown += '<details><summary>Click to expand commit records</summary>\n\n</details>'
+              markdown += '<details><summary>Click to expand commit records</summary>\n\n'
             }
             //for each commitRecord, add to markdown
             markdown += '| Run ID | Title | Commit SHA | Committed At | Updated At | Lead Time |\n' +
@@ -447,7 +447,6 @@ jobs:
       - name: 'Create json and job summary'
         run: |
           echo "Creating json file"
-          echo "${{ env.LEAD_TIME }}" > leadTime.json
           echo "${{ env.MARKDOWN }}" >> $GITHUB_STEP_SUMMARY
 
       - name: 'Publish artifact'
