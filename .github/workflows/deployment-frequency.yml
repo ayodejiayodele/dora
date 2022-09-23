@@ -419,12 +419,12 @@ jobs:
               '- Average lead time: ' + averageLeadTime + ' hours\n\n' +
               '## DORA Classification: ' + doraClassification + '\n' +
               '![Lead Time](https://badgen.net/badge/leadtime/' + encodeURIComponent(leadTimeString) + '/' + color + '?icon=github&label=Lead%20time)' + '\n\n' 
-            console.log(context.payload.repository.url)
+
             //for each commitRecord, add to markdown
             markdown += '| Run ID | Title | Commit SHA | Committed At | Updated At | Lead Time |\n' +
               '| --- | --- | --- | --- | --- | --- |\n'
             for (const commitRecord of commitRecords) {
-              markdown += '| ' + commitRecord["\"run_id\""] + ' | ' + commitRecord["\"title\""] + ' | [' + commitRecord["\"commit_sha\""].indexOf("parent") > 1? commitRecord["\"commit_sha\""].substring(0,7).concat(" (parent)") : commitRecord["\"commit_sha\""].substring(0,7) + '](' + context.payload.repository.url + '/' + commitRecord["\"commit_sha\""].replace(" (parent)","") + ') | ' + commitRecord["\"committed_at\""] + ' | ' + commitRecord["\"updated_at\""] + ' | ' + commitRecord["\"lead_time\""] + ' |\n'
+              markdown += '| ' + commitRecord["\"run_id\""] + ' | ' + commitRecord["\"title\""] + ' | [' + commitRecord["\"commit_sha\""].indexOf("parent") > 1? commitRecord["\"commit_sha\""].substring(0,7).concat(" (parent)") : commitRecord["\"commit_sha\""].substring(0,7) + '](' + context.payload.repository.url + '/commits/' + commitRecord["\"commit_sha\""].replace(" (parent)","") + ') | ' + commitRecord["\"committed_at\""] + ' | ' + commitRecord["\"updated_at\""] + ' | ' + commitRecord["\"lead_time\""] + ' |\n'
             }
             markdown +=  '| | | | | **Total Lead Time** | ' + totalLeadTime + ' hours |\n' +
               '| | | | | **Average Lead Time** | ' + averageLeadTime + ' hours |\n'
