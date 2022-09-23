@@ -439,8 +439,8 @@ jobs:
             if (commitRecords.length > 10) {
               markdown +=    '\n\n</details>'
             }
-            
-            markdown = markdown.replace(/"/g, '')
+
+            //markdown = markdown.replace(/"/g, '')
 
             core.exportVariable('MARKDOWN', markdown)
 
