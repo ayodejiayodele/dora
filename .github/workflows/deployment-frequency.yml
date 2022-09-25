@@ -388,7 +388,7 @@ jobs:
             if (averageLeadTime <= 1) {
               doraClassification = 'Elite'
               color = 'green'
-              leadTimeString = 'Less than one hour'
+              leadTimeString = 'Less than 1 hour'
             } else if (averageLeadTime > 1 && averageLeadTime <= 24) {
               doraClassification = 'Elite'
               color = 'green'
