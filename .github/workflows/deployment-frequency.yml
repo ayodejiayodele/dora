@@ -425,7 +425,7 @@ jobs:
               markdown += '<details><summary>Click to expand commit records</summary>\n\n'
             }
             //for each commitRecord, add to markdown
-            markdown += '| Run ID | Title | Commit SHA | Committed At | Updated At | Lead Time |\n' +
+            markdown += '| Run ID | Title | Commit SHA | Committed At | Deployed At | Lead Time |\n' +
               '| --- | --- | --- | --- | --- | --- |\n'
             for (const commitRecord of commitRecords) {
               let commitText = commitRecord["\"commit_sha\""].indexOf("parent") > 1 ? commitRecord["\"commit_sha\""].substring(1,8).concat(" (parent)") : commitRecord["\"commit_sha\""].substring(1,8) 
