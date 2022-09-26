@@ -414,7 +414,7 @@ jobs:
             }
 
             let markdown = '## DORA Metric: Lead Time for Changes\n' +
-              'This is the amount of time it takes to get a change from commit to production. It is a measure of how quickly you can get value to your customers. It is also a measure of how quickly you can respond to problems in production. The lower the lead time, the better.\n\n'
+              'This is the amount of time it takes to get a change from commit to production. It is a measure of how quickly you can get value to your customers. It is also a measure of how quickly you can respond to problems in production. The lower the lead time, the better.\n\n' + 
               '### Results\n' +
               '- Workflow Name: ' + workflowId + '\n' +
               '- Job Name: ' + jobName + '\n' +
