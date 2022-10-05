@@ -283,7 +283,6 @@ jobs:
       - name: 'Publish artifact'
         uses: actions/upload-artifact@v3.1.0
         with:
-          name: deployment-frequency
           path: deploymentFrequency.json
 
       - name: 'Publish artifact production runs'
